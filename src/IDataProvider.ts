@@ -1,6 +1,3 @@
 import { IOracleData } from "./IOracleData";
 
-export interface IDataProvider<TProviderDataParams>
-{
-	requestData(params: TProviderDataParams): Promise<IOracleData>
-}
+export type IDataProvider<TProviderDataParams> = (params: TProviderDataParams) => Promise<IOracleData>
