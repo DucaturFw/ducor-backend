@@ -11,18 +11,12 @@ export interface IDataRequest
 
 export type RequestHandler = (req: IDataRequest) => Promise<boolean>
 
-export interface IBlockchainReader
-{
-	on(event: "request", listener: RequestHandler): void
-	off(event: "request", listener: RequestHandler): void
-}
+export type IBlockchainReader = (listener: RequestHandler) => Promise<{ stop: () => Promise<void> }>
+
 export interface ITxPushResult<T>
 {
 	txhash: string
 	result: T
 }
 
-export interface IBlockchainPusher<TTxResult>
-{
-	pushData(receiver: string, data: IOracleData): Promise<ITxPushResult<TTxResult>>
-}
+export type IBlockchainPusher<TTxResult> = (receiver: string, data: IOracleData) => Promise<ITxPushResult<TTxResult>>
