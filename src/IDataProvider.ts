@@ -1,3 +1,1 @@
-import { IOracleData } from "./IOracleData";
-
-export type IDataProvider<TProviderDataParams> = (params: TProviderDataParams) => Promise<IOracleData>
+export type IDataProvider<TParams, TResponse> = (params: TParams) => Promise<TResponse>

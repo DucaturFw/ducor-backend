@@ -1,4 +1,4 @@
-import { IOracleData } from "./IOracleData";
+import { IOracleData } from "./IOracleData"
 
 export interface IDataRequest
 {
