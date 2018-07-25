@@ -9,7 +9,7 @@ export let start: IBlockchainReader = async listener =>
 		receiver: "fake_address",
 		requestId: `${i++}`,
 		timestamp: Date.now()
-	}), 100)
+	}), 1000)
 
 	return {
 		stop: async () => clearInterval(timer)
@@ -17,6 +17,9 @@ export let start: IBlockchainReader = async listener =>
 }
 export let push: IBlockchainPusher<boolean> = async (receiver, data) =>
 {
+	console.log(`[FAKE] PUSHED DATA TO ${receiver}`)
+	console.log(data)
+
 	return {
 		txhash: `${receiver}+${data.dataHash}`,
 		result: true
