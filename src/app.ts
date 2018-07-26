@@ -18,6 +18,9 @@ let onRequest: RequestHandler = async req =>
 	console.log("NEW REQUEST")
 	console.log(req)
 	let def = await getDataDefByHash(req.dataHash)
+	if (!def)
+		return console.log(`data hash not found! ${req.dataHash}`), false
+	
 	let response = await providers[def.provider as keyof typeof providers](def.params)
 	let tx = await writers[def.provider as keyof typeof writers](req.receiver, response)
 	return tx.result
