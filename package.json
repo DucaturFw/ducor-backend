@@ -9,7 +9,9 @@
     "start": "ts-node src/app.ts"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
     "@types/node": "^10.5.3",
+    "axios": "^0.18.0",
     "keccak": "^1.4.0",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
