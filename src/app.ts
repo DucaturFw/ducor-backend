@@ -1,18 +1,13 @@
 import { start as fakeRead, push as fakePush } from "./blockchains/fake"
-import { request as fakeRequest } from "./providers/fake"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
-import { request as binance } from "./providers/binance"
+import { providers } from "./providers"
 
 console.log("hello")
 
 let readers = [ fakeRead ]
 let writers = {
 	fake: fakePush
-}
-let providers = {
-	fake: fakeRequest,
-	binance
 }
 
 let onRequest: RequestHandler = async req =>
