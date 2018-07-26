@@ -1,4 +1,5 @@
 import { start as fakeRead, push as fakePush, contract as fakeContract } from "./blockchains/fake"
+import { contract as eosContract } from "./blockchains/eos"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers, types } from "./providers"
@@ -30,7 +31,8 @@ let onRequest: RequestHandler = async req =>
 let stoppers = readers.forEach(r => r(onRequest))
 
 let generators = {
-	fake: fakeContract
+	fake: fakeContract,
+	eos: eosContract,
 }
 
 apiConfig.config = () => ({
@@ -58,7 +60,8 @@ apiConfig.config = () => ({
 apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefreq }) =>
 {
 	let type = types[provider as keyof typeof types](slug)
-	let e: IContractEndpointSettings = { type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash: hashDataId({ category, provider, ident: slug }) }
+	let name = slug.replace(/\W/gi, '').toLowerCase()
+	let e: IContractEndpointSettings = { name, type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash: hashDataId({ category, provider, ident: slug }) }
 	let generator = generators[blockchain as keyof typeof generators]
 	if (!generator)
 		return { contract: "...", instructions: "..." }

@@ -29,6 +29,7 @@ export interface IContractEndpoint
 {
 	hash: string
 	type: IDataType
+	name: string
 }
 
 export interface IContractEndpointSettings extends IContractEndpoint
