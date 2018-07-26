@@ -1,4 +1,6 @@
 import axios from "axios"
+import { IDataProvider } from "../IDataProvider"
+import { IDataType } from "../IOracleData"
 
 export let SYMBOLS = [
 	"ETHBTC","LTCBTC","BNBBTC","NEOBTC","QTUMETH","EOSETH","SNTETH","BNTETH","BCCBTC","GASBTC","BNBETH",
@@ -37,14 +39,13 @@ export let SYMBOLS = [
 	"ARDRBNB","NULSUSDT","HOTBTC","HOTETH","VETBTC","VETETH","VETUSDT","VETBNB"
 ]
 
-import { IDataProvider } from "../IDataProvider"
+export let getType = (str: string): IDataType => "price"
 
-export let request: IDataProvider<{ query: string, pair: string }> = async req =>
+export let request: IDataProvider = async params =>
 {
-	console.log(`[BINANCE] REQUESTED DATA (/${req.query}):`)
-	console.log(req)
+	console.log(`[BINANCE] REQUESTED DATA (${params}):`)
 	
-	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${req.pair}`
+	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${params}`
 	let res = await axios(url)
 	let data = res.data
 	return {

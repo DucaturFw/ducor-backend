@@ -1,4 +1,5 @@
 import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
+import { IContractGenerator } from "../IOracleData";
 
 export let start: IBlockchainReader = async listener =>
 {
@@ -25,3 +26,9 @@ export let push: IBlockchainPusher<boolean> = async (receiver, dataHash, data) =
 		result: true
 	}
 }
+export let contract: IContractGenerator = endpoints => endpoints.map(x =>
+	`push_${x.type}_${x.hash}(bytes value)\n{\n${[
+		`DATA["${x.hash}"] = value;`,
+		`last_update_${x.hash} = now();`,
+	].map(s => `\t${s}`).join('\n')}}\n`
+).join("\n")

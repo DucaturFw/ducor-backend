@@ -1,3 +1,3 @@
 import { IOracleData } from "./IOracleData"
 
-export type IDataProvider<TParams> = (params: TParams) => Promise<IOracleData>
+export type IDataProvider = (ident: string) => Promise<IOracleData>

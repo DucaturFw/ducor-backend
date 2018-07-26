@@ -5,3 +5,5 @@ export let providers = {
 	fake,
 	binance,
 }
+
+export { types } from "./types"

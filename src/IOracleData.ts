@@ -1,4 +1,5 @@
-export interface IDataGeneric<TType, TData>
+export type IDataType = "bytes" | "int" | "float" | "string" | "price"
+export interface IDataGeneric<TType extends IDataType, TData>
 {
 	type: TType
 	data: TData
@@ -10,14 +11,30 @@ export type IOracleData =
 	| IDataGeneric<"string", string>
 	| IDataGeneric<"price", { price: number, decimals: number }>
 
-export interface IDataHashSource<TProviderDataParams extends { [key: string]: string | number | boolean }>
+type FlatObj = { [key: string]: string | number | boolean }
+export interface IDataHashSource
 {
 	category: string
 	provider: string
-	params: TProviderDataParams
+	ident: string
 }
 
-export interface IDataDefinition<TProviderDataParams extends { [key: string]: string | number | boolean }> extends IDataHashSource<TProviderDataParams>
+export interface IDataDefinition extends IDataHashSource
 {
+	type: IDataType
 	hash: string
 }
+
+export interface IContractEndpoint
+{
+	hash: string
+	type: IDataType
+}
+
+export interface IContractEndpointSettings extends IContractEndpoint
+{
+	updateFreq: number
+	lifetime: number
+}
+
+export type IContractGenerator = (endpoints: IContractEndpointSettings[]) => string
