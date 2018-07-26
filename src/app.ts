@@ -10,6 +10,8 @@ import { hashDataId } from "./utils/hasher";
 
 console.log("hello")
 
+require('dotenv').config()
+
 let readers = [ fakeRead ]
 let writers = {
 	fake: fakePush
