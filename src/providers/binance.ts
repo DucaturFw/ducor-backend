@@ -1,3 +1,5 @@
+import axios from "axios"
+
 export let SYMBOLS = [
 	"ETHBTC","LTCBTC","BNBBTC","NEOBTC","QTUMETH","EOSETH","SNTETH","BNTETH","BCCBTC","GASBTC","BNBETH",
 	"BTCUSDT","ETHUSDT","HSRBTC","OAXETH","DNTETH","MCOETH","ICNETH","MCOBTC","WTCBTC","WTCETH","LRCBTC",
@@ -34,3 +36,22 @@ export let SYMBOLS = [
 	"KEYBTC","KEYETH","NASBTC","NASETH","NASBNB","MFTBTC","MFTETH","MFTBNB","DENTBTC","DENTETH","ARDRBTC","ARDRETH",
 	"ARDRBNB","NULSUSDT","HOTBTC","HOTETH","VETBTC","VETETH","VETUSDT","VETBNB"
 ]
+
+import { IDataProvider } from "../IDataProvider"
+
+export let request: IDataProvider<{ query: string, pair: string }> = async req =>
+{
+	console.log(`[BINANCE] REQUESTED DATA (/${req.query}):`)
+	console.log(req)
+	
+	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${req.pair}`
+	let res = await axios(url)
+	let data = res.data
+	return {
+		type: "price",
+		data: {
+			price: res.data.price * 1e8,
+			decimals: 8
+		}
+	}
+}

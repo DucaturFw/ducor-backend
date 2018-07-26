@@ -1,7 +1,8 @@
 import { start as fakeRead, push as fakePush } from "./blockchains/fake"
-import { request as fakeRequest } from "./providers/fake";
-import { RequestHandler } from "./IBlockchain";
-import { getDataDefByHash } from "./reverse_map";
+import { request as fakeRequest } from "./providers/fake"
+import { RequestHandler } from "./IBlockchain"
+import { getDataDefByHash } from "./reverse_map"
+import { request as binance } from "./providers/binance"
 
 console.log("hello")
 
@@ -10,7 +11,8 @@ let writers = {
 	fake: fakePush
 }
 let providers = {
-	fake: fakeRequest
+	fake: fakeRequest,
+	binance
 }
 
 let onRequest: RequestHandler = async req =>
@@ -20,9 +22,9 @@ let onRequest: RequestHandler = async req =>
 	let def = await getDataDefByHash(req.dataHash)
 	if (!def)
 		return console.log(`data hash not found! ${req.dataHash}`), false
-	
+
 	let response = await providers[def.provider as keyof typeof providers](def.params)
-	let tx = await writers[def.provider as keyof typeof writers](req.receiver, response)
+	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response)
 	return tx.result
 }
 

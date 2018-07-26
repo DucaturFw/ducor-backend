@@ -1,6 +1,5 @@
 export interface IDataGeneric<TType, TData>
 {
-	dataHash: string
 	type: TType
 	data: TData
 }
