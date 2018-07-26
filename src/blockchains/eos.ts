@@ -1,4 +1,6 @@
 import { IContractGenerator, IContractEndpointSettings } from "../IOracleData"
+import { IBlockchainPusher } from "../IBlockchain"
+import { callContract } from "./lib"
 
 export let contract: IContractGenerator = endpoints => gen(feed(endpoints))
 
@@ -33,3 +35,14 @@ let feed = (endpoints: IContractEndpointSettings[]) => ({
 		{ suffix: "price", type: "price" }
 	]
 })
+
+export let push: IBlockchainPusher<boolean> = async (receiver, dataHash, data) =>
+{
+	console.log(`[EOS] PUSHED DATA TO ${receiver}`)
+	console.log(data)
+
+	return {
+		txhash: `${receiver}+${dataHash}`,
+		result: true
+	}
+}
