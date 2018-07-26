@@ -6,7 +6,7 @@ export let start: IBlockchainReader = async listener =>
 	let i = 0
 	let timer = setInterval(() => listener({
 		blockchain: "fake",
-		dataHash: "010e039df408a241b369b79cf09e8dad50662491581e5a9d2ebeb1d1fd33f180",
+		dataHash: "363e7fe8b47534460fd06dafd5e18a542fe1aaa78038d7ca5e84694f99a788e5",
 		receiver: "fake_address",
 		requestId: `${i++}`,
 		timestamp: Date.now()
