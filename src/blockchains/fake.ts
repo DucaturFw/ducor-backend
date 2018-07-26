@@ -9,7 +9,7 @@ export let start: IBlockchainReader = async listener =>
 		receiver: "fake_address",
 		requestId: `${i++}`,
 		timestamp: Date.now()
-	}), 1000)
+	}), 10000)
 
 	return {
 		stop: async () => clearInterval(timer)
