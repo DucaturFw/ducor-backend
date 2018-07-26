@@ -11,9 +11,14 @@ export type IOracleData =
 	| IDataGeneric<"string", string>
 	| IDataGeneric<"price", { price: number, decimals: number }>
 
-export interface IDataDefinition<TProviderDataParams>
+export interface IDataHashSource<TProviderDataParams extends { [key: string]: string | number | boolean }>
 {
-	hash: string
+	category: string
 	provider: string
 	params: TProviderDataParams
+}
+
+export interface IDataDefinition<TProviderDataParams extends { [key: string]: string | number | boolean }> extends IDataHashSource<TProviderDataParams>
+{
+	hash: string
 }
