@@ -1,7 +1,7 @@
 import { IContractGenerator, IContractEndpointSettings, IOracleData, IDataGeneric } from "../IOracleData"
 import { IBlockchainPusher } from "../IBlockchain"
-import { callContract } from "./lib"
 import { IEosContract, IEosjsCallsParams } from "eosjs"
+import eosPush from "./eos-push"
 
 export let contract: IContractGenerator = endpoints => gen(feed(endpoints))
 
@@ -30,7 +30,7 @@ let feed = (endpoints: IContractEndpointSettings[]) => ({
 		}
 	],
 	providers: endpoints.map(epToProv),
-	endpoint: [
+	endpoints: [
 		{ suffix: "uint", type: "uint64_t" },
 		{ suffix: "str", type: "std::string" },
 		{ suffix: "price", type: "price" }
@@ -54,15 +54,6 @@ export let push: IBlockchainPusher<boolean> = async (receiver, dataHash, data) =
 {
 	console.log(`[EOS] PUSHED DATA TO ${receiver}`)
 	console.log(data)
-
-	let result = await callContract<IConsumerContract, IDataArgs>(receiver, `push${data.type}` as keyof IConsumerContract, {
-		data: data.data,
-		data_id: `0x${dataHash}`,
-		oracle: `unknown`
-	}, { authorization: "unknown" })
-
-	return {
-		txhash: `${receiver}+${dataHash}`,
-		result: true
-	}
+	
+	return eosPush(receiver, dataHash, data)
 }
