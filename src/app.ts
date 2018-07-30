@@ -74,7 +74,7 @@ apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefr
 	}
 }
 
-let PORT = 3091
+let PORT = process.env.DUCOR_API_PORT
 api.listen(PORT, () =>
 {
 	console.log(`api listening on ${PORT}`)
