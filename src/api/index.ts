@@ -17,6 +17,14 @@ export let CONFIG = {
 	})
 }
 
+// CORS
+app.use((req, res, next) =>
+{
+	res.header("Access-Control-Allow-Origin", "*")
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+	next()
+})
+
 app.get('/time', (req, res) => res.json({ time: Date.now() }))
 app.get('/config', (req, res) => res.json(CONFIG.config()))
 app.get('/generate/:blockchain/:category/:provider/:slug', (req, res) => res.json(CONFIG.generate({
