@@ -9,6 +9,7 @@ export interface IPayload {
 }
 
 export interface IEosOptions {
+  chainId: string
   endpoint: string
   keyprovider: string
 }
@@ -16,8 +17,9 @@ export interface IEosOptions {
 function eos(config: Partial<IEosOptions>) {
   if (eosInstance == null) {
     eosInstance = Eos({
+      chainId: config.chainId,
       keyProvider: config.keyprovider,
-      httpEndpoint: config.endpoint || "http://0.0.0.0:8888"
+      httpEndpoint: config.endpoint
     })
   }
 
@@ -26,6 +28,7 @@ function eos(config: Partial<IEosOptions>) {
 
 function getContract(contract: string) {
   return eos({
+    chainId: process.env.EOS_CHAINID,
     keyprovider: process.env.EOS_PRIVATEKEY,
     endpoint: process.env.EOS_ENDPOINT
   }).contract(contract)
@@ -85,7 +88,7 @@ export default async function push(
 
 export async function sell(contract: string) {
   let instance = await getContract(contract)
-  await instance.sell("eosio", 5, {
-    authorization: ["eosio"]
+  await instance.sell(process.env.EOS_ORACLE_ACCOUNT, 5, {
+    authorization: [process.env.EOS_ORACLE_ACCOUNT]
   })
 }

@@ -74,8 +74,10 @@ async function exec() {
   // })
   // console.log(code)
   // console.log(process.env.EOS_PRIVATEKEY)
+
+  console.log("----------------------------- oraclize")
   await push(
-    "oraclized",
+    "priceoracliz",
     hasher.hashDataId({
       category: "crypto",
       provider: "binance",
@@ -90,8 +92,9 @@ async function exec() {
     }
   )
 
+  console.log("----------------------------- oraclize")
   await push(
-    "oraclized",
+    "priceoracliz",
     hasher.hashDataId({
       category: "crypto",
       provider: "binance",
@@ -105,7 +108,8 @@ async function exec() {
       }
     }
   )
-  await sell("oraclized")
+  console.log("----------------------------- sell")
+  await sell("priceoracliz")
 }
 
 exec()
