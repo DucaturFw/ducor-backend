@@ -1,4 +1,4 @@
-declare module "eosjs"
+declare module 'eosjs'
 {
 	import * as EosEcc from "eosjs-ecc"
 
