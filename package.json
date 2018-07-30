@@ -6,13 +6,15 @@
   "author": "zlumer <zlumer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/app.ts"
+    "start": "ts-node src/app.ts",
+    "test:eos-push": "EOS_ORACLE_ACCOUNT=oracle EOS_PRIVATEKEY=5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 EOS_ENDPOINT=http://0.0.0.0:8888 ts-node src/blockchains/eos-push.test.ts"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
     "@types/express": "^4.16.0",
-    "@types/node": "^10.5.3",
+    "@types/node": "^10.5.4",
     "axios": "^0.18.0",
+    "bignumber.js": "^7.2.1",
     "dotenv": "^6.0.0",
     "eosjs": "^16.0.0",
     "express": "^4.16.3",
