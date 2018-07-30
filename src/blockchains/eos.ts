@@ -30,7 +30,7 @@ let feed = (endpoints: IContractEndpointSettings[]) => ({
 		}
 	],
 	providers: endpoints.map(epToProv),
-	endpoint: [
+	endpoints: [
 		{ suffix: "uint", type: "uint64_t" },
 		{ suffix: "str", type: "std::string" },
 		{ suffix: "price", type: "price" }
