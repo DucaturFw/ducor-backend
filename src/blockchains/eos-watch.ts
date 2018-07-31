@@ -24,19 +24,16 @@ export interface IEosWatchOptions {
 }
 
 const OPTIONS: IEosWatchOptions = {
-  delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY || "1500"),
+  delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
   eos: {
-    chainId:
-      process.env.EOS_CHAINID ||
-      "038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca",
-    httpEndpoint:
-      process.env.EOS_ENDPOINT || "http://peer.test.alohaeos.com:8888"
+    chainId: process.env.DUCOR_EOS_CHAINID!,
+    httpEndpoint: process.env.DUCOR_EOS_ENDPOINT!
   },
-  masterAccount: process.env.DUCOR_EOS_MASTER_ORACLE || "ducormaster",
-  rethinkHost: process.env.DUCOR_EOS_RETHINKHOST || "localhost",
-  rethinkPort: parseInt(process.env.DUCOR_EOS_RETHINKPORT || "28015"),
-  rethinkDatabase: process.env.DUCOR_EOS_RETHINKDATABASE || "ducor",
-  rethinkTable: process.env.DUCOR_EOS_RETHINKTABLE || "eos_requests"
+  masterAccount: process.env.DUCOR_EOS_MASTER_ORACLE!,
+  rethinkHost: process.env.DUCOR_EOS_RETHINKHOST!,
+  rethinkPort: parseInt(process.env.DUCOR_EOS_RETHINKPORT!),
+  rethinkDatabase: process.env.DUCOR_EOS_RETHINKDATABASE!,
+  rethinkTable: process.env.DUCOR_EOS_RETHINKTABLE!
 }
 
 function getEos(opts: any) {
