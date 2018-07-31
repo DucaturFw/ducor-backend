@@ -1,5 +1,6 @@
 import { IOracleData, IDataGeneric } from "../IOracleData"
 import Eos from "eosjs"
+import { ITxPushResult } from "../IBlockchain";
 
 let eosInstance: any
 
@@ -34,7 +35,7 @@ function getContract(contract: string) {
   }).contract(contract)
 }
 
-function pushContract(instance: any, type: string, hash: string, data: any) {
+function pushContract(instance: any, type: string, hash: string, data: any): Promise<void> {
   return instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
     authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
   })
@@ -73,14 +74,14 @@ export default async function push(
   contract: string,
   hash: string,
   data: IOracleData
-) {
+): Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
-      return pushPrice(contract, hash, data)
+      return pushPrice(contract, hash, data).then(x => console.log(x)), {txhash: "", result: true}
     case "int":
-      return pushInt(contract, hash, data)
+      return pushInt(contract, hash, data), {txhash: "", result: true}
     case "uint":
-      return pushUint(contract, hash, data)
+      return pushUint(contract, hash, data), {txhash: "", result: true}
     default:
       throw new Error("Not implemented data type: " + data.type)
   }
