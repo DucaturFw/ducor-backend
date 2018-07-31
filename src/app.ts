@@ -5,9 +5,9 @@ import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers, types } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
-import { SYMBOLS as BINANCE_SYMBOLS } from "./providers/crypto/binance";
-import { IContractEndpointSettings } from "./IOracleData";
-import { hashDataId } from "./utils/hasher";
+import { matcher as binanceMatcher } from "./providers/crypto/binance"
+import { IContractEndpointSettings } from "./IOracleData"
+import { hashDataId } from "./utils/hasher"
 
 console.log("hello")
 
@@ -37,13 +37,15 @@ let generators = {
 	eos: eosContract,
 }
 
+let binancePairs = binanceMatcher.listPairsCanonical().map(x => x.join('/'))
+
 apiConfig.config = () => ({
 	categories: [
 		{
 			name: "crypto",
-			types: ["eth/btc", "ducat/eth", ...BINANCE_SYMBOLS],
+			types: ["eth/btc", "ducat/eth", ...binancePairs],
 			providers: [
-				{ id: "binance", name: "Binance", types: BINANCE_SYMBOLS },
+				{ id: "binance", name: "Binance", types: binancePairs },
 				{ id: "ducatur", name: "Ducatur Crypto", types: ["eth/btc", "ducat/eth"] }
 			]
 		},
