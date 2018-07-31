@@ -1,7 +1,9 @@
+import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
 import Eos, { EosInstance } from "eosjs"
 import r from "rethinkdb"
 
 export interface ITask {
+  id: string
   task: string
   contract: string
   timestamp: number
@@ -40,11 +42,9 @@ const OPTIONS: IEosWatchOptions = {
 function getEos(opts: any) {
   return Eos(opts)
 }
-
 function getContract(eos: EosInstance, account: string) {
   return eos.contract(account)
 }
-
 function getTable(
   eos: EosInstance,
   code: string,
@@ -58,7 +58,6 @@ function getTable(
     json: "true"
   })
 }
-
 async function getTasks(eosOptions: any, master: string): Promise<ITask[]> {
   const eos = getEos(eosOptions)
   const response = await getTable(eos, master, master, "request")
@@ -69,38 +68,50 @@ async function getTasks(eosOptions: any, master: string): Promise<ITask[]> {
   }))
 }
 
-async function loop(immediately?: boolean) {
-  if (!immediately) {
-    setTimeout(() => loop(true), OPTIONS.delay)
-    return
-  }
-
-  const conn = await r.connect({
-    host: OPTIONS.rethinkHost,
-    port: OPTIONS.rethinkPort
-  })
-
-  const databases = await r.dbList().run(conn)
-  if (databases.indexOf(OPTIONS.rethinkDatabase) === -1) {
-    await r.dbCreate(OPTIONS.rethinkDatabase).run(conn)
-  }
-
-  const db = r.db(OPTIONS.rethinkDatabase)
-  const tables = await db.tableList().run(conn)
-  if (tables.indexOf(OPTIONS.rethinkTable) === -1) {
-    await db.tableCreate(OPTIONS.rethinkTable, { primary_key: "id" }).run(conn)
-  }
-
-  const tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
-  await db
-    .table(OPTIONS.rethinkTable)
-    .insert(tasks, {
-      conflict: "replace"
+export const start: IBlockchainReader = async listener => {
+  const timer = setInterval(async () => {
+    const conn = await r.connect({
+      host: OPTIONS.rethinkHost,
+      port: OPTIONS.rethinkPort
     })
-    .run(conn)
 
-  loop()
-  await conn.close()
+    const databases = await r.dbList().run(conn)
+    if (databases.indexOf(OPTIONS.rethinkDatabase) === -1) {
+      await r.dbCreate(OPTIONS.rethinkDatabase).run(conn)
+    }
+
+    const db = r.db(OPTIONS.rethinkDatabase)
+    const tables = await db.tableList().run(conn)
+    if (tables.indexOf(OPTIONS.rethinkTable) === -1) {
+      await db
+        .tableCreate(OPTIONS.rethinkTable, { primary_key: "id" })
+        .run(conn)
+    }
+
+    const tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
+    await db
+      .table(OPTIONS.rethinkTable)
+      .insert(tasks, {
+        conflict: "replace"
+      })
+      .run(conn)
+
+    await conn.close()
+
+    await Promise.all(
+      tasks.filter(t => t.active).map(t =>
+        listener({
+          dataHash: t.task,
+          requestId: t.id,
+          receiver: t.contract,
+          blockchain: "eos",
+          timestamp: new Date().getTime()
+        })
+      )
+    )
+  }, OPTIONS.delay)
+
+  return {
+    stop: async () => clearInterval(timer)
+  }
 }
-
-loop()
