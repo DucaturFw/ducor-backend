@@ -28,15 +28,15 @@ function eos(config: Partial<IEosOptions>) {
 
 function getContract(contract: string) {
   return eos({
-    chainId: process.env.EOS_CHAINID,
-    keyprovider: process.env.EOS_PRIVATEKEY,
-    endpoint: process.env.EOS_ENDPOINT
+    chainId: process.env.DUCOR_EOS_CHAINID,
+    keyprovider: process.env.DUCOR_EOS_ORACLE_PRIVATEKEY,
+    endpoint: process.env.DUCOR_EOS_ENDPOINT
   }).contract(contract)
 }
 
 function pushContract(instance: any, type: string, hash: string, data: any) {
-  return instance[`push${type}`](process.env.EOS_ORACLE_ACCOUNT, hash, data, {
-    authorization: [process.env.EOS_ORACLE_ACCOUNT]
+  return instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
+    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
   })
 }
 
@@ -88,7 +88,7 @@ export default async function push(
 
 export async function sell(contract: string) {
   let instance = await getContract(contract)
-  await instance.sell(process.env.EOS_ORACLE_ACCOUNT, 5, {
-    authorization: [process.env.EOS_ORACLE_ACCOUNT]
+  await instance.sell(process.env.DUCOR_EOS_ORACLE_ACCOUNT, 5, {
+    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
   })
 }

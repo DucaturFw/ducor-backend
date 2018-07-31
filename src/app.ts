@@ -1,5 +1,6 @@
+require('dotenv').config()
 import { start as fakeRead, push as fakePush, contract as fakeContract } from "./blockchains/fake"
-import { contract as eosContract } from "./blockchains/eos"
+import { contract as eosContract, start as eosRead, push as eosPush } from "./blockchains/eos"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers, types } from "./providers"
@@ -10,11 +11,11 @@ import { hashDataId } from "./utils/hasher";
 
 console.log("hello")
 
-require('dotenv').config()
 
-let readers = [fakeRead]
+let readers = [fakeRead, eosRead]
 let writers = {
-	fake: fakePush
+	fake: fakePush,
+	eos: eosPush
 }
 
 let onRequest: RequestHandler = async req => {
