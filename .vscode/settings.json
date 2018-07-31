@@ -1,3 +1,4 @@
 {
-  "prettier.semi": false
+  "prettier.semi": false,
+  "editor.formatOnSave": false
 }

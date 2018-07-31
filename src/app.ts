@@ -1,5 +1,6 @@
+require('dotenv').config()
 import { start as fakeRead, push as fakePush, contract as fakeContract } from "./blockchains/fake"
-import { contract as eosContract } from "./blockchains/eos"
+import { contract as eosContract, start as eosRead, push as eosPush } from "./blockchains/eos"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers, types } from "./providers"
@@ -10,15 +11,14 @@ import { hashDataId } from "./utils/hasher";
 
 console.log("hello")
 
-require('dotenv').config()
 
-let readers = [ fakeRead ]
+let readers = [fakeRead, eosRead]
 let writers = {
-	fake: fakePush
+	fake: fakePush,
+	eos: eosPush
 }
 
-let onRequest: RequestHandler = async req =>
-{
+let onRequest: RequestHandler = async req => {
 	console.log("NEW REQUEST")
 	console.log(req)
 	let def = await getDataDefByHash(req.dataHash)
@@ -59,15 +59,14 @@ apiConfig.config = () => ({
 	],
 })
 
-apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefreq }) =>
-{
+apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
 	let type = types[provider as keyof typeof types](slug)
 	let name = slug.replace(/\W/gi, '').toLowerCase()
 	let e: IContractEndpointSettings = { name, type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash: hashDataId({ category, provider, ident: slug }) }
 	let generator = generators[blockchain as keyof typeof generators]
 	if (!generator)
 		return { contract: "...", instructions: "..." }
-	
+
 	return {
 		contract: generator([e]),
 		instructions: `${blockchain}_contract_instructions`
@@ -75,7 +74,6 @@ apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefr
 }
 
 let PORT = process.env.DUCOR_API_PORT
-api.listen(PORT, () =>
-{
+api.listen(PORT, () => {
 	console.log(`api listening on ${PORT}`)
 })
