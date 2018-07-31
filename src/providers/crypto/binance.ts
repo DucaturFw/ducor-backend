@@ -1,6 +1,6 @@
 import axios from "axios"
-import { IDataProvider } from "../IDataProvider"
-import { IDataType } from "../IOracleData"
+import { IDataProvider } from "../../IDataProvider"
+import { IDataType } from "../../IOracleData"
 
 export let SYMBOLS = [
 	"ETHBTC","LTCBTC","BNBBTC","NEOBTC","QTUMETH","EOSETH","SNTETH","BNTETH","BCCBTC","GASBTC","BNBETH",
@@ -51,7 +51,7 @@ export let request: IDataProvider = async params =>
 	return {
 		type: "price",
 		data: {
-			price: res.data.price * 1e8,
+			price: Math.round(res.data.price * 1e8),
 			decimals: 8
 		}
 	}

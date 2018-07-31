@@ -1,5 +1,5 @@
 import { IDataDefinition, IDataType } from "./IOracleData"
-import { SYMBOLS } from "./providers/binance"
+import { SYMBOLS } from "./providers/crypto/binance"
 import { hashDataId } from "./utils/hasher"
 
 let dataDefinitions = SYMBOLS

@@ -4,7 +4,7 @@ import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers, types } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
-import { SYMBOLS as BINANCE_SYMBOLS } from "./providers/binance";
+import { SYMBOLS as BINANCE_SYMBOLS } from "./providers/crypto/binance";
 import { IContractEndpointSettings } from "./IOracleData";
 import { hashDataId } from "./utils/hasher";
 
