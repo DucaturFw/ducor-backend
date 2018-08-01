@@ -1,4 +1,4 @@
-import { getDataDefByHash } from "./reverse_map";
+import { getDataDefByHash } from "./reverse_map"
 
 describe("reverse_map migration", () =>
 {
@@ -17,10 +17,10 @@ describe("reverse_map data ids", () =>
 {
 	it('should return LTC/BTC', async () =>
 	{
-		let data = await getDataDefByHash("1bed56281c12d572641e8a2436b8244d252c9e13c9d12d368fb3c02b1e0f4c63")
+		let data = await getDataDefByHash("7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542")
 		expect(data.category).toEqual('crypto')
 		expect(data.provider).toEqual('binance')
-		expect(data.hash).toEqual('1bed56281c12d572641e8a2436b8244d252c9e13c9d12d368fb3c02b1e0f4c63')
+		expect(data.hash).toEqual('7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542')
 		expect(data.type).toEqual('price')
 		expect(data.ident).toEqual('LTC/BTC')
 	})
