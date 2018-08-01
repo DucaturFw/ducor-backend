@@ -24,20 +24,6 @@ export interface IEosWatchOptions {
   rethinkTable: string
 }
 
-<<<<<<< HEAD
-console.assert(process.env.DUCOR_EOS_WATCH_DELAY, "DUCOR_EOS_WATCH_DELAY")
-console.assert(process.env.DUCOR_EOS_CHAINID, "DUCOR_EOS_CHAINID")
-console.assert(process.env.DUCOR_EOS_ENDPOINT, "DUCOR_EOS_ENDPOINT")
-console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, "DUCOR_EOS_MASTER_ORACLE")
-console.assert(process.env.DUCOR_EOS_RETHINKHOST, "DUCOR_EOS_RETHINKHOST")
-console.assert(process.env.DUCOR_EOS_RETHINKPORT, "DUCOR_EOS_RETHINKPORT")
-console.assert(
-  process.env.DUCOR_EOS_RETHINKDATABASE,
-  "DUCOR_EOS_RETHINKDATABASE"
-)
-console.assert(process.env.DUCOR_EOS_RETHINKTABLE, "DUCOR_EOS_RETHINKTABLE")
-
-=======
 console.assert(process.env.DUCOR_EOS_WATCH_DELAY, 'DUCOR_EOS_WATCH_DELAY not found in .env!')
 console.assert(process.env.DUCOR_EOS_CHAINID, 'DUCOR_EOS_CHAINID not found in .env!')
 console.assert(process.env.DUCOR_EOS_ENDPOINT, 'DUCOR_EOS_ENDPOINT not found in .env!')
@@ -46,7 +32,6 @@ console.assert(process.env.DUCOR_EOS_RETHINKHOST, 'DUCOR_EOS_RETHINKHOST not fou
 console.assert(process.env.DUCOR_EOS_RETHINKPORT, 'DUCOR_EOS_RETHINKPORT not found in .env!')
 console.assert(process.env.DUCOR_EOS_RETHINKDATABASE, 'DUCOR_EOS_RETHINKDATABASE not found in .env!')
 console.assert(process.env.DUCOR_EOS_RETHINKTABLE, 'DUCOR_EOS_RETHINKTABLE not found in .env!')
->>>>>>> better assert messages
 const OPTIONS: IEosWatchOptions = {
   delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
   eos: {
