@@ -35,17 +35,21 @@ function getContract(contract: string) {
   }).contract(contract)
 }
 
-function pushContract(instance: any, type: string, hash: string, data: any): Promise<void> {
-  return instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
+async function pushContract(instance: any, type: string, hash: string, data: any) : Promise<ITxPushResult<boolean>> {
+  const tx = await instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
     authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
   })
+  return {
+    txhash: tx.transaction_id,
+    result: true    
+  }
 }
 
 async function pushPrice(
   contract: string,
   hash: string,
   data: IDataGeneric<"price", { price: number; decimals: number }>
-) {
+) : Promise<ITxPushResult<boolean>> {
   const instance = await getContract(contract)
   return pushContract(instance, "price", hash, {
     value: data.data.price,
@@ -57,7 +61,7 @@ async function pushInt(
   contract: string,
   hash: string,
   data: IDataGeneric<"int", number>
-) {
+) : Promise<ITxPushResult<boolean>> {
   const instance = await getContract(contract)
   return pushContract(instance, "int", hash, data.data)
 }
@@ -65,7 +69,7 @@ async function pushUint(
   contract: string,
   hash: string,
   data: IDataGeneric<"uint", number>
-) {
+) : Promise<ITxPushResult<boolean>> {
   const instance = await getContract(contract)
   return pushContract(instance, "uint", hash, data.data)
 }
@@ -77,11 +81,11 @@ export default async function push(
 ): Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
-      return pushPrice(contract, hash, data).then(x => console.log(x)), {txhash: "", result: true}
+      return pushPrice(contract, hash, data)
     case "int":
-      return pushInt(contract, hash, data), {txhash: "", result: true}
+      return pushInt(contract, hash, data)
     case "uint":
-      return pushUint(contract, hash, data), {txhash: "", result: true}
+      return pushUint(contract, hash, data)
     default:
       throw new Error("Not implemented data type: " + data.type)
   }
