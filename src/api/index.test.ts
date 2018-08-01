@@ -44,4 +44,26 @@ describe('api responses', () =>
 		expect(res.data).toBeObject()
 		expect(res.data).toEqual({ hello: "world" })
 	})
+	it('should return real config', async () =>
+	{
+		CONFIG.config = config
+
+		let res = await axios(`http://localhost:40789/config`)
+		
+		expect(res).toBeDefined()
+		expect(res.data).toBeObject()
+		let cfg = res.data as { categories: { name: string, types: string[], providers: { id: string, name: string, types: string[] }[] }[] }
+		expect(cfg.categories).toBeArray()
+		let crypto = cfg.categories.find(x => x.name == "crypto")
+		expect(crypto).toBeDefined()
+		crypto = crypto!
+		expect(crypto.types).toBeArray()
+		expect(crypto.types).toContain("ETH/BTC")
+		expect(crypto.providers).toBeArray()
+		let binance = crypto.providers.find(x => x.id == "binance")
+		expect(binance).toBeDefined()
+		binance = binance!
+		expect(binance.types).toBeArray()
+		expect(binance.types).toContain("ETH/BTC")
+	})
 })
