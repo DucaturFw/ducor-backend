@@ -13,3 +13,15 @@ describe("reverse_map migration", () =>
 		expect(data.ident).toEqual('ETH/BTC')
 	})
 })
+describe("reverse_map data ids", () =>
+{
+	it('should return LTC/BTC', async () =>
+	{
+		let data = await getDataDefByHash("1bed56281c12d572641e8a2436b8244d252c9e13c9d12d368fb3c02b1e0f4c63")
+		expect(data.category).toEqual('crypto')
+		expect(data.provider).toEqual('binance')
+		expect(data.hash).toEqual('1bed56281c12d572641e8a2436b8244d252c9e13c9d12d368fb3c02b1e0f4c63')
+		expect(data.type).toEqual('price')
+		expect(data.ident).toEqual('LTC/BTC')
+	})
+})
