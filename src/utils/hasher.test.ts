@@ -23,6 +23,9 @@ describe('keccak256 hashing', () =>
 	it('should hash data hash sources', () =>
 	{
 		expect(hasher.hashDataId({ category: "crypto", provider: "binance", ident: "ETHBTC" })).toEqual('363e7fe8b47534460fd06dafd5e18a542fe1aaa78038d7ca5e84694f99a788e5')
+		
+		let ltcbtc = hasher.hashDataId({ category: "crypto", provider: "binance", ident:"LTC/BTC" })
+		expect(ltcbtc).toEqual('7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542')
 	})
 	it('should equal hash data hash sources', () =>
 	{

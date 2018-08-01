@@ -22,7 +22,7 @@
     "keccak": "^1.4.0",
     "rethinkdb": "^2.3.3",
     "ts-node": "^7.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   },
   "devDependencies": {
     "@types/jest": "^23.3.0",
