@@ -24,19 +24,18 @@ export interface IEosWatchOptions {
   rethinkTable: string
 }
 
-console.assert(process.env.DUCOR_EOS_WATCH_DELAY, "DUCOR_EOS_WATCH_DELAY")
-console.assert(process.env.DUCOR_EOS_CHAINID, "DUCOR_EOS_CHAINID")
-console.assert(process.env.DUCOR_EOS_ENDPOINT, "DUCOR_EOS_ENDPOINT")
-console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, "DUCOR_EOS_MASTER_ORACLE")
-console.assert(process.env.DUCOR_EOS_RETHINKHOST, "DUCOR_EOS_RETHINKHOST")
-console.assert(process.env.DUCOR_EOS_RETHINKPORT, "DUCOR_EOS_RETHINKPORT")
-console.assert(
-  process.env.DUCOR_EOS_RETHINKDATABASE,
-  "DUCOR_EOS_RETHINKDATABASE"
-)
-console.assert(process.env.DUCOR_EOS_RETHINKTABLE, "DUCOR_EOS_RETHINKTABLE")
+function assertEnv() {
+  console.assert(process.env.DUCOR_EOS_WATCH_DELAY, 'DUCOR_EOS_WATCH_DELAY not found in .env!')
+  console.assert(process.env.DUCOR_EOS_CHAINID, 'DUCOR_EOS_CHAINID not found in .env!')
+  console.assert(process.env.DUCOR_EOS_ENDPOINT, 'DUCOR_EOS_ENDPOINT not found in .env!')
+  console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, 'DUCOR_EOS_MASTER_ORACLE not found in .env!')
+  console.assert(process.env.DUCOR_EOS_RETHINKHOST, 'DUCOR_EOS_RETHINKHOST not found in .env!')
+  console.assert(process.env.DUCOR_EOS_RETHINKPORT, 'DUCOR_EOS_RETHINKPORT not found in .env!')
+  console.assert(process.env.DUCOR_EOS_RETHINKDATABASE, 'DUCOR_EOS_RETHINKDATABASE not found in .env!')
+  console.assert(process.env.DUCOR_EOS_RETHINKTABLE, 'DUCOR_EOS_RETHINKTABLE not found in .env!')
+}
 
-const OPTIONS: IEosWatchOptions = {
+const getOptions = (): IEosWatchOptions => (assertEnv(), {
   delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
   eos: {
     chainId: process.env.DUCOR_EOS_CHAINID!,
@@ -47,7 +46,7 @@ const OPTIONS: IEosWatchOptions = {
   rethinkPort: parseInt(process.env.DUCOR_EOS_RETHINKPORT!),
   rethinkDatabase: process.env.DUCOR_EOS_RETHINKDATABASE!,
   rethinkTable: process.env.DUCOR_EOS_RETHINKTABLE!
-}
+})
 
 function getEos(opts: any) {
   return Eos(opts)
@@ -111,6 +110,7 @@ async function checkOrCreateTable(
 }
 
 export const start: IBlockchainReader = async listener => {
+  const OPTIONS = getOptions()
   const timer = setInterval(async () => {
     const conn = await getConnection(OPTIONS)
     const db = await getOrCreateDatabase(OPTIONS.rethinkDatabase, conn)

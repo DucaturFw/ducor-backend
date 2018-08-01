@@ -1,16 +1,14 @@
 require('dotenv').config()
-import { start as fakeRead, push as fakePush, contract as fakeContract } from "./blockchains/fake"
-import { contract as eosContract, start as eosRead, push as eosPush } from "./blockchains/eos"
+
+import { start as fakeRead, push as fakePush } from "./blockchains/fake"
+import { start as eosRead, push as eosPush } from "./blockchains/eos"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
-import { providers, types } from "./providers"
+import { providers } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
-import { matcher as binanceMatcher } from "./providers/crypto/binance"
-import { IContractEndpointSettings } from "./IOracleData"
-import { hashDataId } from "./utils/hasher"
+import { generate, config } from "./api/configurator"
 
 console.log("hello")
-
 
 let readers = [fakeRead, eosRead]
 let writers = {
@@ -32,48 +30,8 @@ let onRequest: RequestHandler = async req => {
 
 let stoppers = readers.forEach(r => r(onRequest))
 
-let generators = {
-	fake: fakeContract,
-	eos: eosContract,
-}
-
-let binancePairs = binanceMatcher.listPairsCanonical().map(x => x.join('/'))
-
-apiConfig.config = () => ({
-	categories: [
-		{
-			name: "crypto",
-			types: ["eth/btc", "ducat/eth", ...binancePairs],
-			providers: [
-				{ id: "binance", name: "Binance", types: binancePairs },
-				{ id: "ducatur", name: "Ducatur Crypto", types: ["eth/btc", "ducat/eth"] }
-			]
-		},
-		{
-			name: "stocks"
-		},
-		{
-			name: "sports"
-		},
-		{
-			name: "random"
-		}
-	],
-})
-
-apiConfig.generate = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
-	let type = types[provider as keyof typeof types](slug)
-	let name = slug.replace(/\W/gi, '').toLowerCase()
-	let e: IContractEndpointSettings = { name, type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash: hashDataId({ category, provider, ident: slug }) }
-	let generator = generators[blockchain as keyof typeof generators]
-	if (!generator)
-		return { contract: "...", instructions: "..." }
-
-	return {
-		contract: generator([e]),
-		instructions: `${blockchain}_contract_instructions`
-	}
-}
+apiConfig.config = config
+apiConfig.generate = generate
 
 let PORT = process.env.DUCOR_API_PORT
 api.listen(PORT, () => {
