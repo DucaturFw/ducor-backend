@@ -1,6 +1,7 @@
 import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
 import Eos, { EosInstance } from "eosjs"
 import r from "rethinkdb"
+import { connect } from "tls"
 
 export interface ITask {
   id: string
@@ -23,14 +24,18 @@ export interface IEosWatchOptions {
   rethinkTable: string
 }
 
-console.assert(process.env.DUCOR_EOS_WATCH_DELAY, 'DUCOR_EOS_WATCH_DELAY')
-console.assert(process.env.DUCOR_EOS_CHAINID, 'DUCOR_EOS_CHAINID')
-console.assert(process.env.DUCOR_EOS_ENDPOINT, 'DUCOR_EOS_ENDPOINT')
-console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, 'DUCOR_EOS_MASTER_ORACLE')
-console.assert(process.env.DUCOR_EOS_RETHINKHOST, 'DUCOR_EOS_RETHINKHOST')
-console.assert(process.env.DUCOR_EOS_RETHINKPORT, 'DUCOR_EOS_RETHINKPORT')
-console.assert(process.env.DUCOR_EOS_RETHINKDATABASE, 'DUCOR_EOS_RETHINKDATABASE')
-console.assert(process.env.DUCOR_EOS_RETHINKTABLE, 'DUCOR_EOS_RETHINKTABLE')
+console.assert(process.env.DUCOR_EOS_WATCH_DELAY, "DUCOR_EOS_WATCH_DELAY")
+console.assert(process.env.DUCOR_EOS_CHAINID, "DUCOR_EOS_CHAINID")
+console.assert(process.env.DUCOR_EOS_ENDPOINT, "DUCOR_EOS_ENDPOINT")
+console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, "DUCOR_EOS_MASTER_ORACLE")
+console.assert(process.env.DUCOR_EOS_RETHINKHOST, "DUCOR_EOS_RETHINKHOST")
+console.assert(process.env.DUCOR_EOS_RETHINKPORT, "DUCOR_EOS_RETHINKPORT")
+console.assert(
+  process.env.DUCOR_EOS_RETHINKDATABASE,
+  "DUCOR_EOS_RETHINKDATABASE"
+)
+console.assert(process.env.DUCOR_EOS_RETHINKTABLE, "DUCOR_EOS_RETHINKTABLE")
+
 const OPTIONS: IEosWatchOptions = {
   delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
   eos: {
@@ -47,9 +52,11 @@ const OPTIONS: IEosWatchOptions = {
 function getEos(opts: any) {
   return Eos(opts)
 }
+
 function getContract(eos: EosInstance, account: string) {
   return eos.contract(account)
 }
+
 function getTable(
   eos: EosInstance,
   code: string,
@@ -73,27 +80,47 @@ async function getTasks(eosOptions: any, master: string): Promise<ITask[]> {
   }))
 }
 
+async function getConnection(opts: IEosWatchOptions): Promise<r.Connection> {
+  return r.connect({
+    host: opts.rethinkHost,
+    port: opts.rethinkPort
+  })
+}
+
+async function getOrCreateDatabase(
+  database: string,
+  connection: r.Connection
+): Promise<r.Db> {
+  const databases = await r.dbList().run(connection)
+  if (databases.indexOf(database) === -1) {
+    await r.dbCreate(database).run(connection)
+  }
+
+  return r.db(database)
+}
+async function checkOrCreateTable(
+  table: string,
+  db: r.Db,
+  conn: r.Connection,
+  opts?: r.TableOptions
+) {
+  const tables = await db.tableList().run(conn)
+  if (tables.indexOf(table) === -1) {
+    await db.tableCreate(table, opts).run(conn)
+  }
+}
+
 export const start: IBlockchainReader = async listener => {
   const timer = setInterval(async () => {
-    const conn = await r.connect({
-      host: OPTIONS.rethinkHost,
-      port: OPTIONS.rethinkPort
+    const conn = await getConnection(OPTIONS)
+    const db = await getOrCreateDatabase(OPTIONS.rethinkDatabase, conn)
+
+    await checkOrCreateTable(OPTIONS.rethinkTable, db, conn, {
+      primary_key: "id"
     })
 
-    const databases = await r.dbList().run(conn)
-    if (databases.indexOf(OPTIONS.rethinkDatabase) === -1) {
-      await r.dbCreate(OPTIONS.rethinkDatabase).run(conn)
-    }
-
-    const db = r.db(OPTIONS.rethinkDatabase)
-    const tables = await db.tableList().run(conn)
-    if (tables.indexOf(OPTIONS.rethinkTable) === -1) {
-      await db
-        .tableCreate(OPTIONS.rethinkTable, { primary_key: "id" })
-        .run(conn)
-    }
-
     const tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
+    
     await db
       .table(OPTIONS.rethinkTable)
       .insert(tasks, {
