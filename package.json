@@ -6,7 +6,8 @@
   "author": "zlumer <zlumer@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/app.ts"
+    "start": "ts-node src/app.ts",
+    "test": "jest"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
@@ -18,7 +19,6 @@
     "dotenv": "^6.0.0",
     "eosjs": "^16.0.0",
     "express": "^4.16.3",
-    "jest-extended": "^0.8.1",
     "keccak": "^1.4.0",
     "rethinkdb": "^2.3.3",
     "ts-node": "^7.0.0",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.0",
+    "jest-extended": "^0.8.1",
     "jest": "^23.4.1",
     "ts-jest": "^23.0.1"
   }
