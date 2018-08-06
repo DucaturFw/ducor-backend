@@ -17,10 +17,6 @@ Tests are run locally with `npm test`.
 
 #### Docker Compose
 
-Assuming, you have ducor-frontend nearby cloned (`../ducor-frontend`):
-
-    docker-compose up -d
-
 For tests:
 
     docker-compose -f docker-compose.test.yml up
