@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
+        - DUCOR_EOS_ORACLE_PRIVATEKEY=5HqECDpMfwJcdsUVKgkGQHXy8XBaubqxUnyDcazP9TXvuXQVatx
+        - DUCOR_EOS_ORACLE_ACCOUNT=workshop2221
+        - DUCOR_API_PORT=3091
+        - DUCOR_EOS_WATCH_DELAY=10000
+        - DUCOR_EOS_CHAINID=038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca
+        - DUCOR_EOS_ENDPOINT=http://peer.test.alohaeos.com:8888
+        - DUCOR_EOS_MASTER_ORACLE=ducormaster
+        - DUCOR_EOS_RETHINKHOST=rethinkdb
+        - DUCOR_EOS_RETHINKPORT=28015
+        - DUCOR_EOS_RETHINKDATABASE=ducor
+        - DUCOR_EOS_RETHINKTABLE=eos_requests
+    ports:
+      - "3091:3091"
+    env_file: .env
+    depends_on:
+      - rethinkdb
+
+  devapi:
+    build:
+      context: ../ducor-frontend
+      dockerfile: Dockerfile-devapi
+      args:
+        - DUCOR_FRONT_URL=localhost
+        - DUCOR_FRONT_PORT=80
+        - DUCOR_API_URL=localhost
+        - DUCOR_API_PORT=3093
+    ports:
+      - "3093:3093"
+    depends_on:
+      - server
+
+  client:
+    build:
+      context: ../ducor-frontend
+      dockerfile: Dockerfile
+      args:
+        - DUCOR_FRONT_URL=localhost
+        - DUCOR_FRONT_PORT=80
+        - DUCOR_API_URL=localhost
+        - DUCOR_API_PORT=3093
+    volumes:
+      - ../ducor-frontend/build:/app/build
+    ports:
+      - "80:80"
+    env_file: []
+    depends_on:
+      - server
+      - devapi
+
+  rethinkdb:
+    image: "rethinkdb"
+    volumes:
+      - ./rethinkdb_data/:/data
+    ports:
+      - "28015:28015"
