@@ -1,9 +1,12 @@
-import { request as fake } from "./fake"
-import { request as binance } from "./crypto/binance"
+import { request as binance, getType as getTypeBinance } from "./crypto/exchanges/binance"
+import { request as bitfinex, getType as getTypeBitfinex } from "./crypto/exchanges/bitfinex"
 
-export let providers = {
-	fake,
+export const providers = {
 	binance,
+	bitfinex,
 }
 
-export { types } from "./types"
+export const types = {
+	binance: getTypeBinance,
+	bitfinex: getTypeBitfinex
+}
