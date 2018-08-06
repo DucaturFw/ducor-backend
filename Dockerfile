@@ -3,7 +3,8 @@ RUN apk add --no-cache --update \
     python \
     python-dev \
     py-pip \
-    build-base
+    build-base \
+    git
 
 WORKDIR /usr/src/app
 # Bundle APP files
