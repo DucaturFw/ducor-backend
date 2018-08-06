@@ -1,7 +1,6 @@
 import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
 import Eos, { EosInstance } from "eosjs"
 import r from "rethinkdb"
-import { connect } from "tls"
 
 export interface ITask {
   id: string
@@ -10,6 +9,7 @@ export interface ITask {
   timestamp: number
   active: boolean
 }
+
 
 export interface IEosWatchOptions {
   delay: number
@@ -120,7 +120,7 @@ export const start: IBlockchainReader = async listener => {
     })
 
     const tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
-    
+
     await db
       .table(OPTIONS.rethinkTable)
       .insert(tasks, {
