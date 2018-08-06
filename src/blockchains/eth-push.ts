@@ -74,11 +74,11 @@ function getContract(connection : Web3, abi: any[], address: string) : Contract{
   return new connection.eth.Contract(abi, address);
 }
 
-async function pushContract(type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
+async function pushContract(receiver: string, type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
   const opts = getOptions();
   const web3provider = getWSProvider(opts.web3provider);
   const web3 = getWeb3(web3provider, opts.oraclePrivateKey);
-  const instance = await getContract(web3, Push, opts.masterAddress);
+  const instance = await getContract(web3, Push, receiver);
   
   console.log(`push_data_${type}`, hash, ...args)
   const request = instance.methods[`push_data_${type}`](hash, ...args);
@@ -103,7 +103,7 @@ async function pushPrice(
   data: IDataGeneric<"price", { price: number; decimals: number }>
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract("price", hash, data.data.price, data.data.decimals)
+  return pushContract(contract, "price", hash, data.data.price, data.data.decimals)
 }
 
 async function pushInt(
@@ -112,7 +112,7 @@ async function pushInt(
   data: IDataGeneric<"int", number>
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract("int", hash, data.data)
+  return pushContract(contract, "int", hash, data.data)
 }
 async function pushUint(
   contract: string,
@@ -120,7 +120,7 @@ async function pushUint(
   data: IDataGeneric<"uint", number>
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract("uint", hash, data.data)
+  return pushContract(contract, "uint", hash, data.data)
 }
 
 export async function push(
