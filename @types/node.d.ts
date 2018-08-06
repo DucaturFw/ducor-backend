@@ -8,5 +8,10 @@ declare namespace NodeJS {
     DUCOR_EOS_RETHINKPORT: string
     DUCOR_EOS_RETHINKDATABASE: string
     DUCOR_EOS_RETHINKTABLE: string
+
+    DUCOR_ETH_PROVIDER: string
+    DUCOR_ETH_MASTER_ADDRESS: string
+    DUCOR_ETH_ORACLE_PRIVATEKEY: string
+    DUCOR_ETH_ORACLE_ACCOUNT: string
   }
 }
