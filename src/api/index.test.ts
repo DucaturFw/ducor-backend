@@ -1,10 +1,10 @@
 import { CONFIG, app } from "."
 import { makeConfig, generate } from "./configurator"
 import { Server } from "http"
+import { init } from "../reverse_map"
 import axios from "axios"
 
 import "jest-extended"
-import { init } from "../reverse_map";
 
 describe('api responses', () =>
 {
