@@ -1,8 +1,9 @@
 import ccxt from 'ccxt'
 
-export type IProvider = 'bitfinex' | 'binance' | 'kraken' // TODO: fill it?
+export type IProvider = 'bitfinex' | 'binance' | 'hitbtc'
+const providers = [ 'bitfinex', 'binance', 'hitbtc' ]
 
-export const getExchanges = () => ccxt.exchanges
+export const getExchanges = () => providers // ccxt.exchanges
 
 export const pairsListRequest = async (providerName: IProvider) => {
   const provider = new ccxt[providerName]()
