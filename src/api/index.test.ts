@@ -1,9 +1,10 @@
 import { CONFIG, app } from "."
-import { config, generate } from "./configurator"
+import { makeConfig, generate } from "./configurator"
 import { Server } from "http"
 import axios from "axios"
 
 import "jest-extended"
+import { init } from "../reverse_map";
 
 describe('api responses', () =>
 {
@@ -15,7 +16,7 @@ describe('api responses', () =>
 	let server: Server
 	beforeAll(done =>
 	{
-		server = app.listen(40789, done)
+		server = app.listen(40789, () => init().then(done))
 	})
 	afterAll(done =>
 	{
@@ -51,7 +52,7 @@ describe('api responses', () =>
 	})
 	it('should return real config', async () =>
 	{
-		CONFIG.config = config
+		CONFIG.config = await makeConfig()
 
 		let res = await axios(`${URL}/config`)
 		
@@ -71,7 +72,7 @@ describe('api responses', () =>
 	})
 	it('should contain bitfinex in config', async () =>
 	{
-		CONFIG.config = config
+		CONFIG.config = await makeConfig()
 
 		let res = await axios(`${URL}/config`)
 		
@@ -92,7 +93,7 @@ describe('api responses', () =>
 		{
 			it(`should return ${exch} contract on ${blockchain}`, async () =>
 			{
-				CONFIG.config = config
+				CONFIG.config = await makeConfig()
 				CONFIG.generate = generate
 
 				let res = await axios(`${URL}/generate/${blockchain}/crypto/${exch}/ETH%2FBTC?updatefreq=100&lifetime=1000`)
