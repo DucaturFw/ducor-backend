@@ -13,10 +13,10 @@ let canonicalToExchange = (asset: string) => (asset == "BCH") ? "BCC" : asset
 let exchangeToCanonical = (asset: string) => (asset == "BCC") ? "BCH" : asset
 
 export let matcher = polyfill({
-	listPairsExchange: () => pairs,
+	listPairsExchange: async () => Promise.resolve(pairs),
 	canonicalToExchange,
 	exchangeToCanonical,
-	pairToExchange: pair => getTicker(pair).symbol
+	pairToExchange: async pair => Promise.resolve(getTicker(pair).symbol)
 })
 
 export let getType = (str: string): IDataType => "price"

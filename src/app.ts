@@ -7,7 +7,7 @@ import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
-import { generate, config } from "./api/configurator"
+import { generate, makeConfig } from "./api/configurator"
 
 console.log("hello")
 
@@ -34,10 +34,13 @@ let onRequest: RequestHandler = async req => {
 
 let stoppers = readers.forEach(r => r(onRequest))
 
-apiConfig.config = config
-apiConfig.generate = generate
+makeConfig().then(config =>
+{
+	apiConfig.config = config
+	apiConfig.generate = generate
 
-let PORT = process.env.DUCOR_API_PORT
-api.listen(PORT, () => {
-	console.log(`api listening on ${PORT}`)
+	let PORT = process.env.DUCOR_API_PORT
+	api.listen(PORT, () => {
+		console.log(`api listening on ${PORT}`)
+	})
 })

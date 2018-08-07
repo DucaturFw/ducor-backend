@@ -36,25 +36,29 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, li
 	}
 }
 
-let binancePairs = binanceMatcher.listPairsCanonical().map(x => x.join('/'))
+export async function makeConfig(): Promise<IConfigFunction>
+{
+	let binancePairs = (await binanceMatcher.listPairsCanonical()).map(x => x.join('/'))
 
-export let config: IConfigFunction = () => ({
-	categories: [
-		{
-			name: "crypto",
-			types: [...binancePairs],
-			providers: [
-				{ id: "binance", name: "Binance", types: binancePairs }
-			]
-		},
-		{
-			name: "stocks"
-		},
-		{
-			name: "sports"
-		},
-		{
-			name: "random"
-		}
-	],
-})
+	let config: IConfigFunction = () => ({
+		categories: [
+			{
+				name: "crypto",
+				types: [...binancePairs],
+				providers: [
+					{ id: "binance", name: "Binance", types: binancePairs }
+				]
+			},
+			{
+				name: "stocks"
+			},
+			{
+				name: "sports"
+			},
+			{
+				name: "random"
+			}
+		],
+	})
+	return config
+}

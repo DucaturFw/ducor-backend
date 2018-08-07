@@ -9,11 +9,11 @@ RUN apk add --no-cache --update \
 WORKDIR /usr/src/app
 # Bundle APP files
 COPY package*.json ./
-RUN npm install --production
+RUN yarn --production
 COPY . .
 
 # Install app dependencies
-ENV DUCOR_EOS_ORACLE_PRIVATEKEY=5HqECDpMfwJcdsUVKgkGQHXy8XBaubqxUnyDcazP9TXvuXQVatx
+ENV DUCOR_EOS_ORACLE_PRIVATEKEY=
 ENV DUCOR_EOS_ORACLE_ACCOUNT=workshop2221
 ENV DUCOR_API_PORT=3091
 ENV DUCOR_EOS_WATCH_DELAY=10000
@@ -28,4 +28,4 @@ ENV DUCOR_EOS_RETHINKTABLE=eos_requests
 # Expose the listening port of your app
 EXPOSE $DUCOR_API_PORT
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
