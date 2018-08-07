@@ -18,7 +18,7 @@ export let CONFIG = {
 }
 
 export type IConfigGenerateFunction = typeof CONFIG.generate
-export type IConfigFunction = typeof CONFIG.config
+export type IConfigFunction = () => Promise<{}>
 
 // CORS
 app.use((req, res, next) =>
