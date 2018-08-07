@@ -46,7 +46,8 @@ export async function makeConfig(): Promise<IConfigFunction>
 				name: "crypto",
 				types: [...binancePairs],
 				providers: [
-					{ id: "binance", name: "Binance", types: binancePairs }
+					{ id: "binance", name: "Binance", types: binancePairs },
+					{ id: "bitfinex", name: "Bitfinex", types: binancePairs }
 				]
 			},
 			{
