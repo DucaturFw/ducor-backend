@@ -6,12 +6,14 @@ import { types } from "../providers"
 
 import { contract as fakeContract } from "../blockchains/fake"
 import { contract as eosContract } from "../blockchains/eos"
+import { contract as ethContract } from "../blockchains/eth"
 
 import configMethod, { initProviders } from './methods/config'
 
 export let generators = {
 	fake: fakeContract,
 	eos: eosContract,
+	eth: ethContract
 }
 
 export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
@@ -34,7 +36,7 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, li
 	}
 }
 
-export const config = async () => {
+export let makeConfig = async () => {
 	const props = await initProviders()
 	return configMethod(props)
 }

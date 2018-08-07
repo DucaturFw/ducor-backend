@@ -2,25 +2,25 @@ export type IAssetConverter = (symbol: string) => string
 
 export interface IPairMatcher
 {
-	listPairsCanonical(): [string, string][]
+	listPairsCanonical(): Promise<[string, string][]>
 }
 export interface IPairMatcherInternal
 {
-	listPairsExchange(): [string, string][]
-	pairToExchange(pair: [string, string]): string
+	listPairsExchange(): Promise<[string, string][]>
+	pairToExchange(pair: [string, string]): Promise<string>
 
 	canonicalToExchange: IAssetConverter
 	exchangeToCanonical: IAssetConverter
 }
-export function listPairs(pairs: [string, string][], convert: IAssetConverter): [string, string][]
+export async function listPairs(pairs: [string, string][], convert: IAssetConverter): Promise<[string, string][]>
 {
-	return pairs.map(p => p.map(convert) as [string, string])
+	return Promise.resolve(pairs.map(p => p.map(convert) as [string, string]))
 }
 
 export function polyfill<T extends Partial<IPairMatcherInternal>>(matcher: T): IPairMatcher & T
 {
 	let obj = Object.assign({}, matcher, {
-		listPairsCanonical: () => listPairs(matcher.listPairsExchange!(), matcher.exchangeToCanonical!)
+		listPairsCanonical: async () => listPairs(await matcher.listPairsExchange!(), matcher.exchangeToCanonical!)
 	})
 	return obj
 }

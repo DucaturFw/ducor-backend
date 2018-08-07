@@ -1,4 +1,6 @@
-import { getDataDefByHash } from "./reverse_map"
+import { getDataDefByHash, init } from "./reverse_map"
+
+beforeAll(async () => await init())
 
 describe("reverse_map migration", () =>
 {
