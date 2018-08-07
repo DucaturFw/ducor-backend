@@ -1,7 +1,7 @@
-import { IConfigGenerateFunction, IConfigFunction } from "."
+import { IConfigGenerateFunction } from "."
 import { hashDataId } from "../utils/hasher"
 import { getDataDefByHash } from "../reverse_map"
-import { IContractEndpointSettings } from "../IOracleData"
+import { IContractEndpointSettings, IDataType } from "../IOracleData"
 import { types } from "../providers"
 
 import { contract as fakeContract } from "../blockchains/fake"
@@ -17,7 +17,7 @@ export let generators = {
 }
 
 export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
-	let type = types[provider as keyof typeof types](slug)
+	let type = types[provider as keyof typeof types](/*slug*/) as IDataType
 	let name = slug.replace(/\W/gi, '').toLowerCase()
 	let hash = hashDataId({ category, provider, ident: slug })
 	if (!getDataDefByHash(hash))

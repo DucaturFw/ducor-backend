@@ -2,7 +2,7 @@ import { getExchanges, pairsListRequest } from '../../providers/crypto'
 
 export type categoriesNames = 'crypto' | 'stocks' | 'sports' | 'random'
 
-export type IConfigMethod = (a: { allPairs: string[], providersWithPairs: Array<[ string, string[] ]> }) => {
+export type IConfigCategories = {
   categories: Array<{
     name: categoriesNames,
     types?: string[],
@@ -13,6 +13,11 @@ export type IConfigMethod = (a: { allPairs: string[], providersWithPairs: Array<
     }>,
   }>,
 }
+
+export type IConfigMethod = (props: {
+  allPairs: string[],
+  providersWithPairs: Array<[ string, string[] ]>
+}) => IConfigCategories
 
 const zip = (arr: any[], ...arrs: any[][]): any[] =>
   arr.map((v, i) => arrs.reduce((a, b) => [...a, b[i]], [v]))

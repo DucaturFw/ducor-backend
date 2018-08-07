@@ -5,4 +5,4 @@ export const providers = getExchanges().reduce((obj, key) =>
 	({ ...obj, [key]: tickerRequest(key as IProvider) }), { fake })
 
 export const types = getExchanges().reduce((obj, key) =>
-	({ ...obj, [key]: 'price' }), { fake: 'price' })
+	({ ...obj, [key]: () => 'price' }), { fake: () => 'price' })
