@@ -9,7 +9,7 @@ RUN apk add --no-cache --update \
 WORKDIR /usr/src/app
 # Bundle APP files
 COPY package*.json ./
-RUN npm install --production
+RUN yarn
 COPY . .
 
 # Install app dependencies
@@ -28,4 +28,4 @@ ENV DUCOR_EOS_RETHINKTABLE=eos_requests
 # Expose the listening port of your app
 EXPOSE $DUCOR_API_PORT
 
-CMD [ "npm", "start" ]
+CMD [ "yarn", "start" ]
