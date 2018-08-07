@@ -1,9 +1,8 @@
-import { request as fake } from "./fake"
-import { request as binance } from "./crypto/binance"
+import { tickerRequest, getExchanges, IProvider } from './crypto'
+import { request as fake } from './fake'
 
-export let providers = {
-	fake,
-	binance,
-}
+export const providers = getExchanges().reduce((obj, key) =>
+	({ ...obj, [key]: tickerRequest(key as IProvider) }), { fake })
 
-export { types } from "./types"
+export const types = getExchanges().reduce((obj, key) =>
+	({ ...obj, [key]: 'price' }), { fake: 'price' })

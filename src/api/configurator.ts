@@ -7,7 +7,7 @@ import { types } from "../providers"
 import { contract as fakeContract } from "../blockchains/fake"
 import { contract as eosContract } from "../blockchains/eos"
 
-import { matcher as binanceMatcher } from "../providers/crypto/binance"
+import configMethod, { initProviders } from './methods/config'
 
 export let generators = {
 	fake: fakeContract,
@@ -34,25 +34,7 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, li
 	}
 }
 
-let binancePairs = binanceMatcher.listPairsCanonical().map(x => x.join('/'))
-
-export let config: IConfigFunction = () => ({
-	categories: [
-		{
-			name: "crypto",
-			types: [...binancePairs],
-			providers: [
-				{ id: "binance", name: "Binance", types: binancePairs }
-			]
-		},
-		{
-			name: "stocks"
-		},
-		{
-			name: "sports"
-		},
-		{
-			name: "random"
-		}
-	],
-})
+export const config = async () => {
+	const props = await initProviders()
+	return configMethod(props)
+}
