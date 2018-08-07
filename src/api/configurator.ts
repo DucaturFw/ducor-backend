@@ -1,14 +1,14 @@
-import { IConfigGenerateFunction, IConfigFunction } from "."
+import { IConfigGenerateFunction } from "."
 import { hashDataId } from "../utils/hasher"
 import { getDataDefByHash } from "../reverse_map"
-import { IContractEndpointSettings } from "../IOracleData"
+import { IContractEndpointSettings, IDataType } from "../IOracleData"
 import { types } from "../providers"
 
 import { contract as fakeContract } from "../blockchains/fake"
 import { contract as eosContract } from "../blockchains/eos"
 import { contract as ethContract } from "../blockchains/eth"
 
-import { matcher as binanceMatcher } from "../providers/crypto/binance"
+import configMethod, { initProviders } from './methods/config'
 
 export let generators = {
 	fake: fakeContract,
@@ -17,7 +17,7 @@ export let generators = {
 }
 
 export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
-	let type = types[provider as keyof typeof types](slug)
+	let type = types[provider as keyof typeof types](/*slug*/) as IDataType
 	let name = slug.replace(/\W/gi, '').toLowerCase()
 	let hash = hashDataId({ category, provider, ident: slug })
 	if (!getDataDefByHash(hash))
@@ -36,29 +36,7 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, li
 	}
 }
 
-export async function makeConfig(): Promise<IConfigFunction>
-{
-	let binancePairs = (await binanceMatcher.listPairsCanonical()).map(x => x.join('/'))
-
-	let config: IConfigFunction = () => ({
-		categories: [
-			{
-				name: "crypto",
-				types: [...binancePairs],
-				providers: [
-					{ id: "binance", name: "Binance", types: binancePairs }
-				]
-			},
-			{
-				name: "stocks"
-			},
-			{
-				name: "sports"
-			},
-			{
-				name: "random"
-			}
-		],
-	})
-	return config
+export let makeConfig = async () => {
+	const props = await initProviders()
+	return configMethod(props)
 }

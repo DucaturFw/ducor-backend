@@ -3,7 +3,7 @@ import express from "express"
 export let app = express()
 
 export let CONFIG = {
-	config: () => ({ }),
+	config: {},
 	generate: ({blockchain, category, provider, slug, updatefreq, lifetime}: {
 		blockchain: string
 		category: string
@@ -29,7 +29,7 @@ app.use((req, res, next) =>
 })
 
 app.get('/time', (req, res) => res.json({ time: Date.now() }))
-app.get('/config', (req, res) => res.json(CONFIG.config()))
+app.get('/config', (req, res) => res.json(CONFIG.config))
 app.get('/generate/:blockchain/:category/:provider/:slug', (req, res) => res.json(CONFIG.generate({
 	blockchain: req.params.blockchain,
 	slug: req.params.slug,
