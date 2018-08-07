@@ -16,7 +16,7 @@ export const tickerRequest = (providerName: IProvider) => async (tickerName: str
   return {
     type: 'price',
     data: {
-      price: ticker.last as number,
+      price: Math.round(ticker.last as number * 1e8),
       decimals: 8,
     },
   }
