@@ -1,12 +1,10 @@
-import { request as binance, getType as getTypeBinance } from "./crypto/exchanges/binance"
-import { request as bitfinex, getType as getTypeBitfinex } from "./crypto/exchanges/bitfinex"
+import { getType as getTypeBinance } from "./crypto/binance"
 
-export const providers = {
-	binance,
-	bitfinex,
-}
+import { tickerRequest, getExchanges, IProvider } from './crypto'
+
+export const providers = getExchanges().reduce((obj, key) =>
+	({ ...obj, [key]: tickerRequest(key as IProvider) }), {})
 
 export const types = {
-	binance: getTypeBinance,
-	bitfinex: getTypeBitfinex
+	binance: getTypeBinance
 }
