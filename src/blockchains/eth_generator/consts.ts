@@ -12,7 +12,7 @@ export interface IETHDataType extends IDTStub
 {
     value: string
 }
-export interface IWideDataType extends IDTStub { [key:string]: string|number|boolean|undefined, value: string|number|boolean; life: number; update: number }
+export interface IWideDataType extends IDTStub { [key:string]: string|number|boolean|undefined|null, value: string|number|boolean; life: number; update: number }
 export const evaluator = (d: IWideDataType) => {
     switch (d.type) {
         case 'price': return !!d.value ? `Price(${d.value}, ${!!d.decimals ? d.decimals : 0})` : PUSH_CONSTRUCTION[d.type].default
