@@ -1,35 +1,38 @@
 import { IDataType } from "../../IOracleData";
 
-export type ETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price'
+export type IETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price'
 interface IDTStub
 {
     name: string
     hash: string
-    type: ETHType
+    type: IETHType
     decimals?: number
 }
+
 export interface IETHDataType extends IDTStub
 {
     value: string
 }
-export interface IWideDataType extends IDTStub { [key:string]: string|number|boolean|undefined|null, value: string|number|boolean; life: number; update: number }
-export const evaluator = (d: IWideDataType) => {
-    switch (d.type) {
-        case 'price': return !!d.value ? `Price(${d.value}, ${!!d.decimals ? d.decimals : 0})` : PUSH_CONSTRUCTION[d.type].default
-        default: break;
-    }
-    return !!d.value ? d.value : PUSH_CONSTRUCTION[d.type].default;
+
+export interface IWideDataType extends IDTStub
+{
+    [key: string]: string|number|boolean|undefined|null
+    value?: string|number|boolean
+    life: number
+    update: number
 }
+
 interface IInput
 {
     type: string
     name: string
 }
+
 export interface ITypeDef
 {
-    default: string
     value: string
     inputs: IInput[]
+    evaluate(d: IWideDataType): string
     getter?: string
     in_code?: string
     rettype?: string
@@ -37,7 +40,7 @@ export interface ITypeDef
 }
 export const PUSH_CONSTRUCTION = {
     price: {
-        default: 'Price(0, 0)',
+        evaluate: (d) => d.value ? `Price(${d.value || 0}, ${d.decimals || 0})` : d.value,
         inputs: [
             { type: 'uint', name: 'value' },
             { type: 'uint8', name: 'decimals' }
@@ -53,37 +56,50 @@ export const PUSH_CONSTRUCTION = {
     }`,
     },
     string: {
-        default: '',
+        evaluate: (d) => d.value,
         inputs: [{type: 'string', name: 'value'}],
         value: 'value'
     },
     uint: {
-        default: '0',
+        evaluate: (d) => d.value,
         inputs: [{type: 'uint', name: 'value'}],
         value: 'value'
     },
     uint8: {
-        default: '0',
+        evaluate: (d) => d.value,
         inputs: [{type: 'uint8', name: 'value'}],
         value: 'value'
     },
     int: {
-        default: '0',
+        evaluate: (d) => d.value,
         inputs: [{type: 'int', name: 'value'}],
         value: 'value'
     },
 } as { [key: string]: ITypeDef }
 
-export const typeMapper = (type: IDataType): ETHType => {
-    if (Object.keys(PUSH_CONSTRUCTION).includes(type.toLowerCase())) return <ETHType>(type.toLowerCase());
-    switch (type) {
-        case 'bytes': return 'string'
-        default: break;
-    }
-    throw new Error('Wrong type provided in ETH contract generator: ' + type)
+interface ITypeMapper
+{
+    <T extends (IDataType & IETHType)>(type: T): T
+    (type: IDataType): IETHType
 }
 
-export const VALID_TYPES = Object.keys(PUSH_CONSTRUCTION);
+export const typeMapper:ITypeMapper = (type: IDataType): IETHType =>
+{
+    switch (type)
+    {
+        case 'string':
+        case 'uint':
+        case 'int':
+        case 'price':
+            return type
+        case 'bytes':
+            return 'string'
+        case 'float':
+            throw new Error('Wrong type provided in ETH contract generator: ' + type)
+    }
+}
+
+export const VALID_TYPES = Object.keys(PUSH_CONSTRUCTION)
 export const TIMING_DEFINITION = `
     struct Data {
         uint update_time;

@@ -3,17 +3,16 @@ import {
     VALID_TYPES,
     TIMING_DEFINITION,
     MASTER_CONTRACT_DEFINITION,
-    ETHType,
+    IETHType,
     IETHDataType,
-    IWideDataType,
-    evaluator
+    IWideDataType
 } from "./consts";
 
 export const getMasterContract = () => {
     return MASTER_CONTRACT_DEFINITION;
 }
 
-export const getPushFunction = (binding: string, type: ETHType) => {
+export const getPushFunction = (binding: string, type: IETHType) => {
     const { inputs, value } = PUSH_CONSTRUCTION[type];
     return `
     function push_data_${type}(string name, ${inputs.map(inp => `${inp.type} ${inp.name}`).join(', ')}) onlyDataPublisher public {
@@ -22,7 +21,7 @@ export const getPushFunction = (binding: string, type: ETHType) => {
     }`
 }
 
-export const getGetter = (name: string, hash: string, type: ETHType) => {
+export const getGetter = (name: string, hash: string, type: IETHType) => {
     return `function get${name}() dataFresh("${hash}") public returns (${PUSH_CONSTRUCTION[type].rettype || type}) {
         if (!check_data_age("${hash}")) {
             request_data("${hash}");
@@ -36,7 +35,7 @@ let toDataType = (d: IWideDataType) => <IETHDataType>({
     name: d.name,
     hash: d.hash,
     decimals: d.decimals || 0,
-    value: evaluator(d)
+    value: PUSH_CONSTRUCTION[d.type].evaluate(d)
 })
 
 const validateType = (type: string) => !!VALID_TYPES.find(t => t == type);
@@ -44,12 +43,12 @@ const getTypeBinding = (type: string) => type[0] + '_data';
 
 class Data {
     binding: string = 'data_timing'
-    types: ETHType[] = []
+    types: IETHType[] = []
     data: { [key: string]: { value: IETHDataType, life: number, update: number } } = {}
 
     constructor(binding: string) { this.binding = binding; }
 
-    addType(typeName: ETHType) {
+    addType(typeName: IETHType) {
         if (!validateType(typeName)) throw ('Wrong type provided.');
         if (!this.types.find(type => type === typeName)) {
             this.types.push(typeName);
@@ -66,9 +65,16 @@ class Data {
     }
 
     getDataDefinition(name: string, { value, update, life }: { value: IETHDataType, life: number, update: number }) {
-        let timings = `${this.binding}["${name}"] = Data(${update}, ${life}, block.number);`;
-        timings += `
-        ${getTypeBinding(value.type)}["${name}"] = ${value.value ? value.value : PUSH_CONSTRUCTION[value.type].default};`;
+        let timings = '';
+        if (!value.value) {
+            timings = `${this.binding}["${name}"] = Data(${update}, ${life}, 0);`;
+            timings += `
+        request_data("${name}");`;
+        } else {
+            timings = `${this.binding}["${name}"] = Data(${update}, ${life}, block.number);`;
+            timings += `
+        ${getTypeBinding(value.type)}["${name}"] = ${value.value};`;
+        }
         return timings;
     }
 
@@ -94,9 +100,8 @@ class Data {
     }
 
     getPushFunctions() {
-        return Object
-            .entries(this.data)
-            .map(([_, dt]) => getPushFunction(this.binding, dt.value.type))
+        return this.types
+            .map(type => getPushFunction(this.binding, type))
             .reduce((prev, curr) => prev + '\n    ' + curr);
     }
 }
@@ -106,7 +111,8 @@ export const getContractBase = (name: string, inputs: IWideDataType[]) => {
     const binding = 'data_timings';
     const data = new Data(binding);
     inputs.forEach(inp => {
-        if (!inp.update || !inp.life || !inp.hash) throw new Error('Not specified life, update or hash for ' + inp.name);
+        if (!inp.update || !inp.life || !inp.hash) throw new Error(`Not specified life, update or hash for ${inp.name}.`);
+        if (inp.update >= inp.life) throw new Error(`Update frequency could not be greater or equal to life for ${inp.name}.`)
         data.addDataType(inp, inp.update, inp.life);
     });
 

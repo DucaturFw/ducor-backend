@@ -34,6 +34,8 @@ contract test_contract {
         data_publisher = data_pub;
         data_timings["alh"] = Data(2, 10, block.number);
         u_data["alh"] = 100;
+        data_timings["req"] = Data(3, 10, 0);
+        request_data("req");
         data_timings["nih"] = Data(5, 100, block.number);
         p_data["nih"] = Price(12345, 2);
     }
@@ -99,6 +101,13 @@ contract test_contract {
         }
         return u_data["alh"];
     }
+
+    function getReq() dataFresh("req") public returns (uint) {
+        if (!check_data_age("req")) {
+            request_data("req");
+        }
+        return u_data["req"];
+    }
     
     function getNihao() dataFresh("nih") public returns (uint) {
         if (!check_data_age("nih")) {
@@ -113,6 +122,7 @@ describe('ETH Contract constructor', () => {
         const created = getContractBase(
             'test_contract', [
                 { hash: 'alh', name: 'Aloha', value: 100, type: 'uint', life: 10, update: 2 },
+                { hash: 'req', name: 'Req', type: 'uint', life: 10, update: 3 },
                 { hash: 'nih', name: 'Nihao', value: 12345, decimals: 2, type: 'price', life: 100, update: 5 },
             ]
         );
@@ -120,17 +130,18 @@ describe('ETH Contract constructor', () => {
     })
 
     ;[0, undefined, null].forEach(val => {
-        let obj = <IWideDataType>{ value: 0, name: 'some', hash: 'exist', update: val, life: 1 }
+        const name = 'name';
+        let obj = <IWideDataType>{ value: 0, name, hash: 'exist', update: val, life: 1 }
         ;['update', 'life', 'hash'].forEach(prop => {
             it(`should fire exception on ${prop} equal to ${val}`, () => {
                 obj[prop] = val;
-                try {
-                    getContractBase('name', [obj]);
-                    expect(false).toBe(true)
-                } catch (err) {
-                    expect(err.message).toContain('Not specified')
-                }
+                expect(() => getContractBase('name', [obj])).toThrow(`Not specified life, update or hash for ${name}.`);
             })
         })
+    })
+
+    it(`should fire exception on update > life`, () => {
+        expect(() => getContractBase('name', [{ value: 0, name: 'name', type: 'int', hash: 'exist', update: 100, life: 10 }]))
+        .toThrow(`Update frequency could not be greater or equal to life for name.`);
     })
 })
