@@ -11,17 +11,23 @@ let getTicker = (pair: [string, string]) =>
 let canonicalToExchange = (asset: string) => asset
 let exchangeToCanonical = (asset: string) => asset
 
+let MARKETS: ccxt.Market[] | undefined
+
 export let matcher = polyfill({
-	listPairsExchange: async () => {
-    const markets = await provider.fetchMarkets()
-    return markets.map(v => v.symbol.split('/')) as [ string, string ][]
-  },
+	listPairsExchange: async () =>
+	{
+		if (!MARKETS)
+			MARKETS = await provider.fetchMarkets()
+		
+		return Promise.resolve(MARKETS.map(v => v.symbol.split('/')) as [ string, string ][])
+	},
 	canonicalToExchange,
 	exchangeToCanonical,
-	pairToExchange: async pair => {
-    const { symbol } = await getTicker(pair)
-    return symbol
-  }
+	pairToExchange: async pair =>
+	{
+		const { symbol } = await getTicker(pair)
+		return symbol
+	}
 })
 
 export let getType = (str: string): IDataType => 'price'
