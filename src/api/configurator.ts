@@ -9,6 +9,7 @@ import { contract as eosContract } from "../blockchains/eos"
 import { contract as ethContract } from "../blockchains/eth"
 
 import { matcher as binanceMatcher } from "../providers/crypto/binance"
+import { matcher as bitfinexMatcher } from "../providers/crypto/bitfinex"
 
 export let generators = {
 	fake: fakeContract,
@@ -38,15 +39,19 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, li
 
 export async function makeConfig(): Promise<IConfigFunction>
 {
-	let binancePairs = (await binanceMatcher.listPairsCanonical()).map(x => x.join('/'))
+	let [binancePairs, bitfinexPairs] = (await Promise.all([binanceMatcher, bitfinexMatcher].map(exch => exch.listPairsCanonical())))
+		.map(pairs => pairs.map(x => x.join('/')))
+
+	let unique = (arr: string[]) => Object.keys(arr.reduce((acc, cur) => acc[cur] = acc, {} as {[key: string]: any}))
 
 	let config: IConfigFunction = () => ({
 		categories: [
 			{
 				name: "crypto",
-				types: [...binancePairs],
+				types: unique([...binancePairs, ...bitfinexPairs]),
 				providers: [
-					{ id: "binance", name: "Binance", types: binancePairs }
+					{ id: "binance", name: "Binance", types: binancePairs },
+					{ id: "bitfinex", name: "Bitfinex", types: bitfinexPairs }
 				]
 			},
 			{

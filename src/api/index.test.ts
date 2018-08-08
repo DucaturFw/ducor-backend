@@ -16,7 +16,7 @@ describe('api responses', () =>
 	let server: Server
 	beforeAll(done =>
 	{
-		server = app.listen(40789, () => init().then(done))
+		server = app.listen(40789, () => init().then(x => (makeConfig(), x)).then(done))
 	})
 	afterAll(done =>
 	{
