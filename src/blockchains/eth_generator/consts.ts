@@ -12,7 +12,7 @@ export interface IETHDataType
 export interface IWideDataType extends IETHDataType { value: any; life: number; update: number }
 export const evaluator = (d: IWideDataType) => {
     switch (d.type) {
-        case 'price': return !!d.value ? `Price(${d.value}, ${d.decimals})` : PUSH_CONSTRUCTION[d.type].default
+        case 'price': return !!d.value ? `Price(${d.value}, ${!!d.decimals ? d.decimals : 0})` : PUSH_CONSTRUCTION[d.type].default
         default: break;
     }
     return !!d.value ? d.value : PUSH_CONSTRUCTION[d.type].default;
