@@ -16,7 +16,7 @@ export interface IETHDataType extends IDTStub
 
 export interface IWideDataType extends IDTStub
 {
-    [key: string]: string|number|boolean|undefined|null
+    [key: string]: string|number|boolean|undefined|IETHType
     value?: string|number|boolean
     life: number
     update: number
@@ -99,7 +99,6 @@ export const typeMapper:ITypeMapper = (type: IDataType): IETHType =>
     }
 }
 
-export const VALID_TYPES = Object.keys(PUSH_CONSTRUCTION)
 export const TIMING_DEFINITION = `
     struct Data {
         uint update_time;

@@ -129,7 +129,7 @@ describe('ETH Contract constructor', () => {
         expect(created).toEqual(EXAMPLE_CONTRACT);
     })
 
-    ;[0, undefined, null].forEach(val => {
+    ;[0, undefined].forEach(val => {
         const name = 'name';
         let obj = <IWideDataType>{ value: 0, name, hash: 'exist', update: val, life: 1 }
         ;['update', 'life', 'hash'].forEach(prop => {

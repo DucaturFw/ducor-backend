@@ -1,6 +1,5 @@
 import {
     PUSH_CONSTRUCTION,
-    VALID_TYPES,
     TIMING_DEFINITION,
     MASTER_CONTRACT_DEFINITION,
     IETHType,
@@ -30,7 +29,7 @@ export const getGetter = (name: string, hash: string, type: IETHType) => {
     }`
 }
 
-let toDataType = (d: IWideDataType) => <IETHDataType>({
+const toDataType = (d: IWideDataType) => <IETHDataType>({
     type: d.type,
     name: d.name,
     hash: d.hash,
@@ -38,7 +37,6 @@ let toDataType = (d: IWideDataType) => <IETHDataType>({
     value: PUSH_CONSTRUCTION[d.type].evaluate(d)
 })
 
-const validateType = (type: string) => !!VALID_TYPES.find(t => t == type);
 const getTypeBinding = (type: string) => type[0] + '_data';
 
 class Data {
@@ -48,10 +46,9 @@ class Data {
 
     constructor(binding: string) { this.binding = binding; }
 
-    addType(typeName: IETHType) {
-        if (!validateType(typeName)) throw ('Wrong type provided.');
-        if (!this.types.find(type => type === typeName)) {
-            this.types.push(typeName);
+    addType(type: IETHType) {
+        if (!this.types.includes(type)) {
+            this.types.push(type);
         }
     }
 
