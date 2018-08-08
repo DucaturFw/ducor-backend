@@ -1,5 +1,6 @@
 import "jest-extended"
 import { getContractBase } from './codepresets'
+import {IWideDataType} from "./consts";
 const EXAMPLE_CONTRACT = `pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
@@ -116,5 +117,20 @@ describe('ETH Contract constructor', () => {
             ]
         );
         expect(created).toEqual(EXAMPLE_CONTRACT);
+    })
+
+    ;[0, undefined, null].forEach(val => {
+        let obj = <IWideDataType>{ value: 0, name: 'some', hash: 'exist', update: val, life: 1 }
+        ;['update', 'life', 'hash'].forEach(prop => {
+            obj[prop] = val;
+            it('should fire exception on zero/undefined hash, life or update time', () => {
+                try {
+                    getContractBase('name', [obj]);
+                    expect(false).toBe(true)
+                } catch (err) {
+                    expect(err.message).toContain('Not specified')
+                }
+            })
+        })
     })
 })

@@ -106,7 +106,7 @@ export const getContractBase = (name: string, inputs: IWideDataType[]) => {
     const binding = 'data_timings';
     const data = new Data(binding);
     inputs.forEach(inp => {
-        if (!inp.update || !inp.life || !inp.hash) throw ('Not specified hash, life or update time for ' + inp.name);
+        if (!inp.update || !inp.life || !inp.hash) throw new Error('Not specified life, update or hash for ' + inp.name);
         data.addDataType(inp, inp.update, inp.life);
     });
 
