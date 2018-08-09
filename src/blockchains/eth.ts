@@ -1,12 +1,12 @@
-import {IContractEndpointSettings, IContractGenerator} from "../IOracleData";
+import {IContractEndpointSettings, IContractGenerator} from "../IOracleData"
+import { getContractBase } from './eth_generator/codepresets'
+import { IWideDataType, typeMapper } from "./eth_generator/consts"
 
 export { start } from './eth-watch'
 export { push } from './eth-push'
 
 export let contract: IContractGenerator = endpoints => getContractBase('NEW_CONTRACT', endpoints.map(ethPrepare))
 
-import { getContractBase } from './eth_generator/codepresets'
-import { IWideDataType, typeMapper } from "./eth_generator/consts";
 
 let ethPrepare = (e: IContractEndpointSettings): IWideDataType => {
   return <IWideDataType>({
