@@ -1,9 +1,8 @@
 import Web3 from "web3"
 import Push from "./Push.json"
 import {Contract, Provider} from 'web3/types'
-import { IOracleData, IDataGeneric } from "../IOracleData"
-import { ITxPushResult } from "../IBlockchain"
-import { IProvider } from "web3/types";
+import { IOracleData, IDataGeneric } from "../../IOracleData"
+import { ITxPushResult } from "../../IBlockchain"
 
 export interface IEthereumWatcherOptions {
   web3provider: string

@@ -1,6 +1,6 @@
-import { IOracleData, IDataGeneric } from "../IOracleData"
+import { IOracleData, IDataGeneric } from "../../IOracleData"
 import Eos from "eosjs"
-import { ITxPushResult } from "../IBlockchain";
+import { ITxPushResult } from "../../IBlockchain";
 
 let eosInstance: any
 

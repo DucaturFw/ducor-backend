@@ -1,4 +1,4 @@
-import { IDataType } from "../../IOracleData";
+import { IDataType } from "../../../IOracleData";
 
 export type IETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price'
 interface IDTStub

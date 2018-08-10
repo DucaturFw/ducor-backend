@@ -1,5 +1,5 @@
 import push, { sell } from "./eos-push"
-import * as hasher from "../utils/hasher"
+import * as hasher from "../../utils/hasher"
 export interface IFieldConfguration {
   type: string
   name: string
