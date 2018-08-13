@@ -1,5 +1,5 @@
 import Web3 from "web3"
-import { IBlockchainReader } from "../IBlockchain"
+import { IBlockchainReader } from "../../IBlockchain"
 import master from "./MasterOracle.json"
 import r from "rethinkdb"
 

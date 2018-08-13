@@ -1,5 +1,5 @@
-import { IContractGenerator, IContractEndpointSettings } from "../IOracleData"
-import { IBlockchainPusher } from "../IBlockchain"
+import { IContractGenerator, IContractEndpointSettings } from "../../IOracleData"
+import { IBlockchainPusher } from "../../IBlockchain"
 import eosPush from "./eos-push"
 
 export let contract: IContractGenerator = endpoints => gen(feed(endpoints))

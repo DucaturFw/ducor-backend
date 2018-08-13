@@ -1,4 +1,4 @@
-import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
+import { IBlockchainReader, IBlockchainPusher } from "../../IBlockchain"
 import Eos, { EosInstance } from "eosjs"
 import r from "rethinkdb"
 

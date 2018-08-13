@@ -1,4 +1,4 @@
-import {IContractEndpointSettings, IContractGenerator} from "../IOracleData"
+import {IContractEndpointSettings, IContractGenerator} from "../../IOracleData"
 import { getContractBase } from './eth_generator/codepresets'
 import {
     decimalsMapper,
