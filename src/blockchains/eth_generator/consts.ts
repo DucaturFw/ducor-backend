@@ -1,6 +1,23 @@
 import { IDataType } from "../../IOracleData";
 
-export type IETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price'
+export const FLOAT_PRECISION = 18
+
+export const decimalsMapper = (type: IDataType): number|undefined => {
+    switch(type) {
+        case 'string':
+        case 'uint':
+        case 'bytes':
+        case 'int':
+            return undefined
+        case 'price':
+        case 'float':
+            return FLOAT_PRECISION // DEFAULT VALUE
+        default:
+            throw new Error('Wrong type provided in ETH contract generator: ' + type)
+    }
+}
+
+export type IETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price' | 'float'
 interface IDTStub
 {
     name: string
@@ -95,6 +112,8 @@ export const typeMapper:ITypeMapper = (type: IDataType): IETHType =>
         case 'bytes':
             return 'string'
         case 'float':
+            return 'price'
+        default:
             throw new Error('Wrong type provided in ETH contract generator: ' + type)
     }
 }
