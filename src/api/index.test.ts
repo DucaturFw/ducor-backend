@@ -1,7 +1,7 @@
 import { CONFIG, app } from "."
 import { makeConfig, generate } from "./configurator"
 import { Server } from "http"
-import { init } from "../reverse_map"
+import { init as reverseMapInit } from "../reverse_map"
 import axios from "axios"
 
 import "jest-extended"
@@ -16,7 +16,7 @@ describe('api responses', () =>
 	let server: Server
 	beforeAll(done =>
 	{
-		server = app.listen(40789, () => init().then(x => (makeConfig(), x)).then(done))
+		server = app.listen(40789, () => reverseMapInit().then(x => (makeConfig(), x)).then(done))
 	})
 	afterAll(done =>
 	{
