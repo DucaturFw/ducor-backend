@@ -12,7 +12,7 @@ export { push } from './eth-push'
 export let contract: IContractGenerator = endpoints => getContractBase('NEW_CONTRACT', endpoints.map(ethPrepare))
 
 
-let ethPrepare = (e: IContractEndpointSettings): IWideDataType => {
+const ethPrepare = (e: IContractEndpointSettings): IWideDataType => {
   return <IWideDataType>({
     hash: `0x${e.hash}`,
     name: e.name,
