@@ -30,8 +30,8 @@ function assertEnv() {
     "DUCOR_EOS_RETHINKPORT not found in .env!"
   )
   console.assert(
-    process.env.DUCOR_QTUM_RETHINKDATABASE,
-    "DUCOR_QTUM_RETHINKDATABASE not found in .env!"
+    process.env.DUCOR_EOS_RETHINKDATABASE,
+    "DUCOR_EOS_RETHINKDATABASE not found in .env!"
   )
   console.assert(
     process.env.DUCOR_QTUM_RETHINKTABLE,
