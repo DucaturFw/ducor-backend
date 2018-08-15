@@ -31,7 +31,7 @@ export let onRequest: RequestHandler = async req => {
 	let category = providers[def.category as keyof typeof providers]
 	let provider = category[def.provider as keyof typeof category] as IDataProvider
 	let response = await provider(def.ident)
-	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response)
+	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response, req.memo)
 	return tx.result
 }
 

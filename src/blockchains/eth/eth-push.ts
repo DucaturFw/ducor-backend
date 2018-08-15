@@ -125,7 +125,8 @@ async function pushUint(
 export async function push(
   contract: string,
   hash: string,
-  data: IOracleData
+  data: IOracleData,
+  memo?: string
 ) : Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
