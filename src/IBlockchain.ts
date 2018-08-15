@@ -7,6 +7,7 @@ export interface IDataRequest
 	receiver: string
 	blockchain: string
 	timestamp: number
+	args?: any[]
 	memo?: string
 }
 

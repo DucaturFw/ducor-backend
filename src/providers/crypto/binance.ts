@@ -21,11 +21,11 @@ export let matcher = polyfill({
 
 export let getType = (str: string): IDataType => "price"
 
-export let request: IDataProvider = async params =>
+export let request: IDataProvider<[]> = async (ident) =>
 {
-	console.log(`[BINANCE] REQUESTED DATA (${params}):`)
+	console.log(`[BINANCE] REQUESTED DATA (${ident}):`)
 	
-	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${matcher.pairToExchange(params.split('/') as [string, string])}`
+	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${matcher.pairToExchange(ident.split('/') as [string, string])}`
 	let res = await axios(url)
 	let data = res.data
 	return {

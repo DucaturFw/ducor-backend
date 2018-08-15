@@ -32,11 +32,11 @@ export let matcher = polyfill({
 
 export let getType = (str: string): IDataType => 'price'
 
-export let request: IDataProvider = async params =>
+export let request: IDataProvider<[]> = async ident =>
 {
-  console.log(`[BITFINEX] REQUESTED DATA (${params}):`)
+  console.log(`[BITFINEX] REQUESTED DATA (${ident}):`)
 
-  const ticker = await provider.fetchTicker(params)
+  const ticker = await provider.fetchTicker(ident)
 	return {
 		type: 'price',
 		data: {

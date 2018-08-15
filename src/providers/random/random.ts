@@ -2,13 +2,13 @@ import { IDataProvider } from "../../IDataProvider"
 import { IOracleData } from "../../IOracleData"
 
 let random = (limit: number) => Math.floor(Math.random() * limit)
-export let getInteger: IDataProvider = ident => Promise.resolve({ type: "int", data: random(parseInt(ident)) } as IOracleData)
-export let getArray: IDataProvider = ident =>
+let randomBetween = (min: number, max: number) => min + random(max - min)
+export let getInteger: IDataProvider<[number, number]> = (ident, min, max) => Promise.resolve({ type: "int", data: randomBetween(min, max) } as IOracleData)
+export let getArray: IDataProvider<[number, number, number]> = (ident, min, max, count) =>
 {
-	let [limit, count] = ident.split(';').map(parseInt)
 	let numbers = []
 	for (let i = 0; i < count; i++)
-		numbers[i] = random(limit)
+		numbers[i] = randomBetween(min, max)
 	
 	return Promise.resolve({ type: "bytes", data: Buffer.from(numbers) } as IOracleData)
 }
