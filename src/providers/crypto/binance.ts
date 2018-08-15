@@ -1,6 +1,5 @@
 import axios from "axios"
-import { IDataProvider } from "../../IDataProvider"
-import { IDataType } from "../../IOracleData"
+import { IDataProvider, ITypeProvider } from "../../IDataProvider"
 import { polyfill } from "./IPairMatcher"
 
 import json from "./binance-data.json"
@@ -19,13 +18,13 @@ export let matcher = polyfill({
 	pairToExchange: async pair => Promise.resolve(getTicker(pair).symbol)
 })
 
-export let getType = (str: string): IDataType => "price"
+export let getType: ITypeProvider<{ pair: string }> = config => ({ type: "price", name: config.pair })
 
-export let request: IDataProvider<[]> = async (ident) =>
+export let request: IDataProvider<{ pair: string }, []> = async (config) =>
 {
-	console.log(`[BINANCE] REQUESTED DATA (${ident}):`)
+	console.log(`[BINANCE] REQUESTED DATA (${config}):`)
 	
-	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${matcher.pairToExchange(ident.split('/') as [string, string])}`
+	let url = `https://api.binance.com/api/v3/ticker/price?symbol=${matcher.pairToExchange(config.pair.split('/') as [string, string])}`
 	let res = await axios(url)
 	let data = res.data
 	return {

@@ -29,8 +29,8 @@ export let onRequest: RequestHandler = async req => {
 		return console.log(`data hash not found! ${req.dataHash}`), false
 
 	let category = providers[def.category as keyof typeof providers]
-	let provider = category[def.provider as keyof typeof category] as IDataProvider<any[]>
-	let response = await provider(def.ident, ...req.args || [])
+	let provider = category[def.provider as keyof typeof category] as IDataProvider<any, any[]>
+	let response = await provider(def.config, ...req.args || [])
 	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response, req.memo)
 	return tx.result
 }
