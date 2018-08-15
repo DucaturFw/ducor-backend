@@ -61,7 +61,12 @@ export async function makeConfig(): Promise<IConfigFunction>
 				name: "sports"
 			},
 			{
-				name: "random"
+				name: "random",
+				types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })(),
+				providers: [
+					{ id: "number", name: "Single random number", types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })() },
+					// { id: "array", name: "Array of random numbers", types:  }
+				]
 			}
 		],
 	})

@@ -8,6 +8,7 @@ import { getDataDefByHash } from "./reverse_map"
 import { providers } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
 import { generate, makeConfig } from "./api/configurator"
+import { IDataProvider } from "./IDataProvider"
 
 console.log("hello")
 
@@ -20,14 +21,16 @@ let writers = {
 	eth: ethPush
 }
 
-let onRequest: RequestHandler = async req => {
+export let onRequest: RequestHandler = async req => {
 	console.log("NEW REQUEST")
 	console.log(req)
 	let def = await getDataDefByHash(req.dataHash)
 	if (!def)
 		return console.log(`data hash not found! ${req.dataHash}`), false
 
-	let response = await providers[def.provider as keyof typeof providers](def.ident)
+	let category = providers[def.category as keyof typeof providers]
+	let provider = category[def.provider as keyof typeof category] as IDataProvider
+	let response = await provider(def.ident)
 	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response)
 	return tx.result
 }
