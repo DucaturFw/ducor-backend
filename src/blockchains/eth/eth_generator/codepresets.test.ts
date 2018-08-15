@@ -7,8 +7,13 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract MasterOracle is Ownable {
     event DataRequest(string name, address receiver);
-    function request_data(string name, address receiver) public {
-        emit DataRequest(name, receiver);
+    event DataRequest(string name, address receiver, bytes params, string memo);
+    function request_data(string name, address receiver, bytes params, string memo) public {
+        if (params.length || memo.length) {
+            emit DataRequest(name, receiver, params, memo);
+        } else {
+            emit DataRequest(name, receiver);
+        }
     }
 }
 
@@ -75,24 +80,24 @@ contract test_contract {
         return block.number < (data_timings[name].last_update + data_timings[name].update_time);
     }
 
-    function push_data_uint(string name, uint value) onlyDataPublisher public {
+    function push_data_uint(string name, uint value, string memo) onlyDataPublisher public {
         data_timings[name].last_update = block.number;
         u_data[name] = value;
     }
 
-    function push_data_price(string name, uint value, uint8 decimals) onlyDataPublisher public {
+    function push_data_price(string name, uint value, uint8 decimals, string memo) onlyDataPublisher public {
         data_timings[name].last_update = block.number;
         p_data[name] = Price(value, decimals);
     }
 
     function request_data_manually(string name) nonEmptyLife(name) dataAntique(name) public {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "", "");
     }
 
     function request_data(string name) nonEmptyLife(name) dataNeedRefresh(name) private {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "", "");
     }
 
     function getAloha() dataFresh("alh") public returns (uint) {

@@ -129,7 +129,12 @@ import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract MasterOracle is Ownable {
     event DataRequest(string name, address receiver);
-    function request_data(string name, address receiver) public {
-        emit DataRequest(name, receiver);
+    event DataRequest(string name, address receiver, bytes params, string memo);
+    function request_data(string name, address receiver, bytes params, string memo) public {
+        if (params.length || memo.length) {
+            emit DataRequest(name, receiver, params, memo);
+        } else {
+            emit DataRequest(name, receiver);
+        }
     }
 }`;

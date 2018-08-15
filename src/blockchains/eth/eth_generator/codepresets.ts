@@ -14,7 +14,7 @@ export const getMasterContract = () => {
 export const getPushFunction = (binding: string, type: IETHType) => {
     const { inputs, value } = PUSH_CONSTRUCTION[type];
     return `
-    function push_data_${type}(string name, ${inputs.map(inp => `${inp.type} ${inp.name}`).join(', ')}) onlyDataPublisher public {
+    function push_data_${type}(string name, ${inputs.map(inp => `${inp.type} ${inp.name}`).join(', ')}, string memo) onlyDataPublisher public {
         ${binding}[name].last_update = block.number;
         ${getTypeBinding(type)}[name] = ${value};
     }`
@@ -166,12 +166,12 @@ contract ${name} {
 
     function request_data_manually(string name) nonEmptyLife(name) dataAntique(name) public {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "", "");
     }
 
     function request_data(string name) nonEmptyLife(name) dataNeedRefresh(name) private {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "", "");
     }
     
     ${data.getGetters()}
