@@ -78,6 +78,8 @@ async function checkOrCreateTable(
   }
 }
 
+function parseArgs(params: any) { return [] }
+
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
   const web3 = new Web3()
@@ -95,7 +97,7 @@ export const start: IBlockchainReader = async listener => {
     .allEvents({
       fromBlock: 0
     })
-    .on("data", async event => {
+    .on("DataRequest", async event => {
       const conn = await getConnection(options.rethinkHost, options.rethinkPort)
       const db = await getOrCreateDatabase(options.rethinkDB, conn)
       await checkOrCreateTable(options.rethinkTable, db, conn, {
@@ -106,6 +108,8 @@ export const start: IBlockchainReader = async listener => {
         id: event.transactionHash,
         task: event.returnValues.name,
         contract: event.returnValues.receiver,
+        args: parseArgs(event.returnValues.params),
+        memo: event.returnValues.memo,
         timestamp: new Date().getTime()
       }
 
@@ -123,7 +127,9 @@ export const start: IBlockchainReader = async listener => {
         requestId: model.id,
         receiver: model.contract,
         blockchain: "eth",
-        timestamp: model.timestamp
+        args: model.args,
+        memo: model.memo,
+        timestamp: model.timestamp,
       })
     })
 
