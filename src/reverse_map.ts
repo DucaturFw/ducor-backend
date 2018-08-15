@@ -1,5 +1,6 @@
 import { IDataDefinition, IDataType } from "./IOracleData"
 import { matcher as binanceMatcher } from "./providers/crypto/binance"
+import { matcher as bitfinexMatcher } from "./providers/crypto/bitfinex";
 import { hashDataId } from "./utils/hasher"
 
 let dataDefinitions: { [key: string]: IDataDefinition }
@@ -17,6 +18,13 @@ export async function init()
 		ident: "ETH/BTC",
 		provider: "binance"
 	})]
+
+	dataDefinitions = (await bitfinexMatcher.listPairsCanonical())
+		.map(x => x.join('/'))
+		.map(x => ({ category: "crypto", provider: "bitfinex", ident: x, type: "price" as IDataType}))
+		.map(x => ({ ...x, hash: hashDataId(x) }))
+		.reduce((acc, cur) => ({ ...acc, [cur.hash]: cur }), dataDefinitions)
+	
 }
 
 export let getDataDefByHash = async (hash: string): Promise<IDataDefinition> =>
