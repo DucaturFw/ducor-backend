@@ -1,9 +1,7 @@
 import { IDataDefinition, IDataType, IDataHashSource } from "./IOracleData"
-import { matcher as binanceMatcher } from "./providers/crypto/binance"
-import { matcher as bitfinexMatcher } from "./providers/crypto/bitfinex"
-import { matcher as hitbtcMatcher } from "./providers/crypto/hitbtc"
 import { hashDataId } from "./utils/hasher"
 import { IPairMatcher } from "./providers/crypto/IPairMatcher"
+import { exchanges } from "./providers"
 
 let dataDefinitions: { [key: string]: IDataDefinition } = {}
 
@@ -21,13 +19,9 @@ export async function init()
 		console.log(`added ${Object.keys(hashes).length} hashes from ${name}`)
 		return hashes
 	}
-
-	dataDefinitions = {
-		...dataDefinitions,
-		...await addHashes(binanceMatcher, "binance"),
-		...await addHashes(bitfinexMatcher, "bitfinex"),
-		...await addHashes(hitbtcMatcher, "hitbtc"),
-	}
+	
+	let matches = await Promise.all(exchanges.map(x => addHashes(x.matcher, x.exchange.id)))
+	Object.assign(dataDefinitions, ...matches)
 	
 	let obj: IDataHashSource = { category: "random", provider: "number", config: {} }
 	let hash = hashDataId(obj)

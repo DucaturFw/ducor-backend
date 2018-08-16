@@ -8,8 +8,7 @@ import { contract as fakeContract } from "../blockchains/fake"
 import { contract as eosContract } from "../blockchains/eos"
 import { contract as ethContract } from "../blockchains/eth"
 
-import { matcher as binanceMatcher } from "../providers/crypto/binance"
-import { matcher as bitfinexMatcher } from "../providers/crypto/bitfinex"
+import { exchanges } from "../providers"
 
 export let generators = {
 	fake: fakeContract,
@@ -38,8 +37,12 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, config, 
 
 export async function makeConfig(): Promise<IConfigFunction>
 {
-	let [binancePairs, bitfinexPairs] = (await Promise.all([binanceMatcher, bitfinexMatcher].map(exch => exch.listPairsCanonical())))
-		.map(pairs => pairs.map(x => x.join('/')))
+	let providers = await Promise.all(exchanges.map(async x => ({
+		id: x.exchange.id,
+		name: x.exchange.name,
+		types: (await x.matcher.listPairsCanonical()).map(x => x.join('/'))
+	})))
+	let flatten = <T>(arr: T[][]) => arr.reduce((acc, val) => acc.concat(val), [])
 
 	let unique = (arr: string[]) => Object.keys(arr.reduce((acc, cur) => acc[cur] = acc, {} as {[key: string]: any}))
 
@@ -47,11 +50,8 @@ export async function makeConfig(): Promise<IConfigFunction>
 		categories: [
 			{
 				name: "crypto",
-				types: unique([...binancePairs, ...bitfinexPairs]),
-				providers: [
-					{ id: "binance", name: "Binance", types: binancePairs },
-					{ id: "bitfinex", name: "Bitfinex", types: bitfinexPairs }
-				]
+				types: unique(flatten(providers.map(x => x.types))),
+				providers
 			},
 			{
 				name: "stocks"
@@ -61,9 +61,9 @@ export async function makeConfig(): Promise<IConfigFunction>
 			},
 			{
 				name: "random",
-				types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })(),
+				types: ["simple", "secure", "random-org"],
 				providers: [
-					{ id: "number", name: "Single random number", types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })() },
+					{ id: "number", name: "Single random number", types: ["simple", "secure", "random-org"] },
 					// { id: "array", name: "Array of random numbers", types:  }
 				]
 			}
