@@ -1,6 +1,6 @@
 import { IOracleData, IDataGeneric } from "../../IOracleData"
 import Eos from "eosjs"
-import { ITxPushResult } from "../../IBlockchain";
+import { ITxPushResult } from "../../IBlockchain"
 
 let eosInstance: any
 
@@ -35,65 +35,25 @@ function getContract(contract: string) {
   }).contract(contract)
 }
 
-async function pushContract(instance: any, type: string, hash: string, data: any) : Promise<ITxPushResult<boolean>> {
-  const tx = await instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
-    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
-  })
-  return {
-    txhash: tx.transaction_id,
-    result: true    
-  }
-}
-
-async function pushPrice(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"price", { price: number; decimals: number }>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "price", hash, {
-    value: data.data.price,
-    decimals: data.data.decimals
-  })
-}
-
-async function pushInt(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"int", number>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "int", hash, data.data)
-}
-async function pushUint(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"uint", number>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "uint", hash, data.data)
-}
-
 export default async function push(
   contract: string,
   hash: string,
-  data: IOracleData
+  data: IOracleData,
+  memo: string
 ): Promise<ITxPushResult<boolean>> {
-  switch (data.type) {
-    case "price":
-      return pushPrice(contract, hash, data)
-    case "int":
-      return pushInt(contract, hash, data)
-    case "uint":
-      return pushUint(contract, hash, data)
-    default:
-      throw new Error("Not implemented data type: " + data.type)
-  }
-}
+  const instance = await getContract(contract)
+  const tx = await instance[`push${data.type}`](
+    process.env.DUCOR_EOS_ORACLE_ACCOUNT,
+    hash,
+    data.data,
+    memo,
+    {
+      authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
+    }
+  )
 
-export async function sell(contract: string) {
-  let instance = await getContract(contract)
-  await instance.sell(process.env.DUCOR_EOS_ORACLE_ACCOUNT, 5, {
-    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
-  })
+  return {
+    txhash: tx.transaction_id,
+    result: true
+  }
 }
