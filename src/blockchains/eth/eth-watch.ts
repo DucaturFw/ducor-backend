@@ -78,7 +78,7 @@ async function checkOrCreateTable(
   }
 }
 
-function parseArgs(params: any) { return [] }
+function parseArgs(params: number[]) { return params }
 
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
@@ -97,7 +97,7 @@ export const start: IBlockchainReader = async listener => {
     .allEvents({
       fromBlock: 0
     })
-    .on("DataRequest", async event => {
+    .on("data", async event => {
       const conn = await getConnection(options.rethinkHost, options.rethinkPort)
       const db = await getOrCreateDatabase(options.rethinkDB, conn)
       await checkOrCreateTable(options.rethinkTable, db, conn, {
