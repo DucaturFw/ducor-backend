@@ -1,6 +1,7 @@
 import Web3 from "web3"
 import Push from "./Push.json"
-import {Contract, Provider} from 'web3/types'
+import Contract from "web3/eth/contract"
+import { Provider } from "web3/providers"
 import { IOracleData, IDataGeneric } from "../../IOracleData"
 import { ITxPushResult } from "../../IBlockchain"
 
@@ -125,7 +126,8 @@ async function pushUint(
 export async function push(
   contract: string,
   hash: string,
-  data: IOracleData
+  data: IOracleData,
+  memo?: string
 ) : Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":

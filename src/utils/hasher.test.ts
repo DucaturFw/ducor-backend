@@ -22,16 +22,16 @@ describe('keccak256 hashing', () =>
 	})
 	it('should hash data hash sources', () =>
 	{
-		expect(hasher.hashDataId({ category: "crypto", provider: "binance", ident: "ETHBTC" })).toEqual('363e7fe8b47534460fd06dafd5e18a542fe1aaa78038d7ca5e84694f99a788e5')
+		expect(hasher.hashDataId({ category: "crypto", provider: "binance", config: { pair: "ETHBTC" } })).toEqual('c346eb2a736a87aa7ec26077b6271d856508187703e92f182c51b348a60541eb')
 		
-		let ltcbtc = hasher.hashDataId({ category: "crypto", provider: "binance", ident:"LTC/BTC" })
-		expect(ltcbtc).toEqual('7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542')
+		let ltcbtc = hasher.hashDataId({ category: "crypto", provider: "binance", config: { pair: "LTC/BTC" } })
+		expect(ltcbtc).toEqual('f778e7fa5b6ece80662b34fd629efea910dc1cf6c0abef62e4bb288daeca6cfb')
 	})
 	it('should equal hash data hash sources', () =>
 	{
 		expect(
-			hasher.hashDataId({ category: "crypto", provider: "binance", ident: "ETHBTC" })).toEqual(
-			hasher.hash("crypto/binance:ETHBTC")
+			hasher.hashDataId({ category: "crypto", provider: "binance", config: { pair: "ETHBTC" } })).toEqual(
+			hasher.hash("crypto/binance:pair=ETHBTC")
 		)
 	})
 })

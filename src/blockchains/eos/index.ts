@@ -40,7 +40,8 @@ export { start } from "./eos-watch"
 export let push: IBlockchainPusher<boolean> = async (
   receiver,
   dataHash,
-  data
+  data,
+  memo
 ) => {
   console.log(`[EOS] PUSHED DATA TO ${receiver}`)
   console.log(data)

@@ -81,7 +81,7 @@ async function exec() {
     hasher.hashDataId({
       category: "crypto",
       provider: "binance",
-      ident: "ETHBTC"
+      config: { pair: "ETHBTC" }
     }),
     {
       type: "price",
@@ -98,7 +98,7 @@ async function exec() {
     hasher.hashDataId({
       category: "crypto",
       provider: "binance",
-      ident: "EOSETH"
+      config: { pair: "EOSETH" }
     }),
     {
       type: "price",
