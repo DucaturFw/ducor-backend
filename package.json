@@ -13,7 +13,6 @@
     "ci": "yarn test-tsc && yarn test"
   },
   "dependencies": {
-    "@types/axios": "^0.14.0",
     "@types/express": "^4.16.0",
     "@types/node": "^10.5.4",
     "@types/rethinkdb": "^2.3.12",
