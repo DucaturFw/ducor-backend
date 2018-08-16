@@ -1,5 +1,5 @@
 import "jest-extended"
-import { getContractBase } from './codepresets'
+import {cleanName, getContractBase} from './codepresets'
 import {IWideDataType} from "./consts";
 const EXAMPLE_CONTRACT = `pragma solidity ^0.4.24;
 
@@ -148,5 +148,12 @@ describe('ETH Contract constructor', () => {
     it(`should fire exception on update > life`, () => {
         expect(() => getContractBase('name', [{ value: 0, name: 'name', type: 'int', hash: 'exist', update: 100, life: 10 }]))
         .toThrow(`Update frequency could not be greater or equal to life for name.`);
+    })
+})
+
+describe('Helper function tests', () => {
+    it('should ignore symbols in names', () => {
+        expect(cleanName('some/name/yeah')).toEqual('somenameyeah')
+        expect(cleanName('so@me%na#me^y$eah')).toEqual('somenameyeah')
     })
 })

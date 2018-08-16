@@ -20,8 +20,10 @@ export const getPushFunction = (binding: string, type: IETHType) => {
     }`
 }
 
+export const cleanName = (name: string, ignore: RegExp = /[-!$%@#^&*()_+|~=`{}\[\]:";'<>?,.\\\/]/g) => name.replace(ignore, '')
+
 export const getGetter = (name: string, hash: string, type: IETHType) => {
-    return `function get${name}() dataFresh("${hash}") public returns (${PUSH_CONSTRUCTION[type].rettype || type}) {
+    return `function get${cleanName(name)}() dataFresh("${hash}") public returns (${PUSH_CONSTRUCTION[type].rettype || type}) {
         if (!check_data_age("${hash}")) {
             request_data("${hash}");
         }
