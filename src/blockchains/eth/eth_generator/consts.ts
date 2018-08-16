@@ -18,12 +18,20 @@ export const decimalsMapper = (type: IDataType): number|undefined => {
 }
 
 export type IETHType = 'uint' | 'uint8' | 'int' | 'string' | 'price' | 'float'
+
+export interface IArg
+{
+    name: string
+    type: 'uint' | 'uint8' | 'int' | 'float'
+}
+
 interface IDTStub
 {
     name: string
     hash: string
     type: IETHType
     decimals?: number
+    args?: IArg[]
 }
 
 export interface IETHDataType extends IDTStub
@@ -33,7 +41,7 @@ export interface IETHDataType extends IDTStub
 
 export interface IWideDataType extends IDTStub
 {
-    [key: string]: string|number|boolean|undefined|IETHType
+    [key: string]: string|number|boolean|undefined|IETHType|IArg[]
     value?: string|number|boolean
     life: number
     update: number
@@ -128,13 +136,12 @@ export const MASTER_CONTRACT_DEFINITION = `
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract MasterOracle is Ownable {
-    event DataRequest(string name, address receiver);
-    event DataRequest(string name, address receiver, bytes params, string memo);
-    function request_data(string name, address receiver, bytes params, string memo) public {
-        if (params.length || memo.length) {
-            emit DataRequest(name, receiver, params, memo);
-        } else {
-            emit DataRequest(name, receiver);
-        }
+    event DataRequest(string name, address receiver, string memo);
+    event DataRequest(string name, address receiver, string memo, int[] params);
+    function request_data(string name, address receiver, string memo) public {
+        emit DataRequest(name, receiver, memo);
+    }
+    function request_data_args(string name, address receiver, string memo, int[] params) public {
+        emit DataRequest(name, receiver, params, memo);
     }
 }`;
