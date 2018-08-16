@@ -6,7 +6,7 @@ describe("bitfinex tests", () =>
 {
 	it('should have bitfinex data', async () =>
 	{
-		let result = await requestBitfinex("ETH/BTC")
+		let result = await requestBitfinex({ pair: "ETH/BTC" })
 		expect(result.type).toEqual("price")
 		if (result.type != "price")
 			return

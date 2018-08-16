@@ -1,5 +1,5 @@
 import ccxt from 'ccxt'
-import { IDataProvider } from '../../IDataProvider'
+import { IDataProvider, ITypeProvider } from '../../IDataProvider'
 import { IDataType } from '../../IOracleData'
 import { polyfill } from './IPairMatcher'
 
@@ -30,13 +30,13 @@ export let matcher = polyfill({
 	}
 })
 
-export let getType = (str: string): IDataType => 'price'
+export let getType: ITypeProvider<{ pair: string }> = config => ({ type: 'price', name: config.pair })
 
-export let request: IDataProvider = async params =>
+export let request: IDataProvider<{ pair: string }, []> = async config =>
 {
-  console.log(`[BITFINEX] REQUESTED DATA (${params}):`)
+  console.log(`[BITFINEX] REQUESTED DATA (${config}):`)
 
-  const ticker = await provider.fetchTicker(params)
+  const ticker = await provider.fetchTicker(config.pair)
 	return {
 		type: 'price',
 		data: {

@@ -1,4 +1,4 @@
-import { IDataType } from "../../../IOracleData";
+import { IDataType } from "../../../IOracleData"
 
 export const FLOAT_PRECISION = 18
 
