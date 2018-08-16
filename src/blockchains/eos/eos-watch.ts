@@ -5,6 +5,8 @@ import r from "rethinkdb"
 export interface ITask {
   id: string
   task: string
+  memo: string,
+  args: string,
   contract: string
   timestamp: number
   active: boolean
@@ -137,7 +139,9 @@ export const start: IBlockchainReader = async listener => {
           requestId: t.id,
           receiver: t.contract,
           blockchain: "eos",
-          timestamp: new Date().getTime()
+          timestamp: new Date().getTime(),
+          args: t.args.split(';'),
+          memo: t.memo
         })
       )
     )
