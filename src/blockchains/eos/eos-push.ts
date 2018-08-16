@@ -39,14 +39,14 @@ export default async function push(
   contract: string,
   hash: string,
   data: IOracleData,
-  memo: string
+  memo?: string
 ): Promise<ITxPushResult<boolean>> {
   const instance = await getContract(contract)
   const tx = await instance[`push${data.type}`](
     process.env.DUCOR_EOS_ORACLE_ACCOUNT,
     hash,
     data.data,
-    memo,
+    memo || "",
     {
       authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
     }
