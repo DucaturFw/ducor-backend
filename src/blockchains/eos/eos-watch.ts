@@ -14,6 +14,7 @@ export interface ITask {
 
 
 export interface IEosWatchOptions {
+  channels: string[],
   delay: number
   eos: {
     chainId: string
@@ -37,7 +38,43 @@ function assertEnv() {
   console.assert(process.env.DUCOR_EOS_RETHINKTABLE, 'DUCOR_EOS_RETHINKTABLE not found in .env!')
 }
 
+function getLogChannels(conf?: string)  : string[]{
+  if (!conf) {
+    return []
+  }
+
+  if (conf === '*') { 
+    return ['ERR', 'WARNING', 'INFO', 'LOG']
+  }
+
+  return conf.split(',')
+}
+
+function genericLog(channel : string, message?: any, ...optionalParams: any[]) {
+  const { channels } = getOptions();
+  if (channels.includes(channel)) {
+    console.log(`[EOS-WATCH][${channel}]: `, message, ...optionalParams)
+  }
+}
+
+function log(message?: any, ...optionalParams: any[]) {
+  genericLog('LOG', message, ...optionalParams);
+}
+
+function info(message?: any, ...optionalParams: any[]) {
+  genericLog('INFO', message, ...optionalParams);
+}
+
+function warn(message?: any, ...optionalParams: any[]) {
+  genericLog('WARNING', message, ...optionalParams);
+}
+
+function error(message?: any, ...optionalParams: any[]) {
+  genericLog('ERROR', message, ...optionalParams);
+}
+
 const getOptions = (): IEosWatchOptions => (assertEnv(), {
+  channels: getLogChannels(process.env.DEBUG),
   delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
   eos: {
     chainId: process.env.DUCOR_EOS_CHAINID!,
@@ -114,37 +151,65 @@ async function checkOrCreateTable(
 export const start: IBlockchainReader = async listener => {
   const OPTIONS = getOptions()
   const timer = setInterval(async () => {
-    const conn = await getConnection(OPTIONS)
-    const db = await getOrCreateDatabase(OPTIONS.rethinkDatabase, conn)
+    let db : r.Db, conn : r.Connection, tasks : ITask[]
 
-    await checkOrCreateTable(OPTIONS.rethinkTable, db, conn, {
-      primary_key: "id"
-    })
+    try {
+      conn = await getConnection(OPTIONS)
+      db = await getOrCreateDatabase(OPTIONS.rethinkDatabase, conn)
 
-    const tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
-
-    await db
-      .table(OPTIONS.rethinkTable)
-      .insert(tasks, {
-        conflict: "replace"
+      await checkOrCreateTable(OPTIONS.rethinkTable, db, conn, {
+        primary_key: "id"
       })
-      .run(conn)
+    } catch (e) {
+      error('Unexpected error in rethink connection')
+      error(e)
+      throw e
+    }
 
-    await conn.close()
+    try {
+      info(`Request tasks from contract (${OPTIONS.masterAccount}) at ${process.env.DUCOR_EOS_ENDPOINT}`)
+      tasks = await getTasks(OPTIONS.eos, OPTIONS.masterAccount)
+      log(`Received tasks \n`, tasks)
+    } catch(e) {
+      error('Unexpected error in requesting tasks')
+      error(e)
+      throw e
+    }
 
-    await Promise.all(
-      tasks.filter(t => t.active).map(t =>
-        listener({
-          dataHash: t.task,
-          requestId: t.id,
-          receiver: t.contract,
-          blockchain: "eos",
-          timestamp: new Date().getTime(),
-          args: t.args.split(';'),
-          memo: t.memo
+    try {
+      await db
+        .table(OPTIONS.rethinkTable)
+        .insert(tasks, {
+          conflict: "replace"
         })
+        .run(conn)
+
+      await conn.close()
+    } catch (e) {
+      error('Unexpected error in storing tasks')
+      error(e)
+      throw e
+    }
+
+    try {
+      await Promise.all(
+        tasks.filter(t => t.active).map(t =>
+          listener({
+            dataHash: t.task,
+            requestId: t.id,
+            receiver: t.contract,
+            blockchain: "eos",
+            timestamp: new Date().getTime(),
+            args: t.args.split(';'),
+            memo: t.memo
+          })
+        )
       )
-    )
+    } catch(e) {
+      error('Unexpected error in sending tasks to providers')
+      error(e)
+      throw e
+    }
   }, OPTIONS.delay)
 
   return {
