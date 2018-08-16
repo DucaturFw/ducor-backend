@@ -46,5 +46,5 @@ export let push: IBlockchainPusher<boolean> = async (
   console.log(`[EOS] PUSHED DATA TO ${receiver}`)
   console.log(data)
 
-  return eosPush(receiver, dataHash, data)
+  return eosPush(receiver, dataHash, data, memo)
 }
