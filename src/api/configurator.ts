@@ -14,7 +14,9 @@ import { matcher as bitfinexMatcher } from "../providers/crypto/bitfinex"
 export let generators = {
 	fake: fakeContract,
 	eos: eosContract,
-	eth: ethContract
+	eth: ethContract,
+	qtum: ethContract
+
 }
 
 export let generate: IConfigGenerateFunction = ({ blockchain, category, config, lifetime, provider, updatefreq }) => {

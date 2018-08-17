@@ -49,13 +49,14 @@ function getOptions(): IEthereumWatcherOptions {
   }
 }
 
-async function getConnection(
+export async function getConnection(
   host: string,
   port: number
 ): Promise<r.Connection> {
   return r.connect({ host, port })
 }
-async function getOrCreateDatabase(
+
+export async function getOrCreateDatabase(
   database: string,
   connection: r.Connection
 ): Promise<r.Db> {
@@ -66,7 +67,8 @@ async function getOrCreateDatabase(
 
   return r.db(database)
 }
-async function checkOrCreateTable(
+
+export async function checkOrCreateTable(
   table: string,
   db: r.Db,
   conn: r.Connection,
@@ -78,7 +80,7 @@ async function checkOrCreateTable(
   }
 }
 
-function parseArgs(params: number[]) { return params }
+export function parseArgs(params: number[]) { return params || [] }
 
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
