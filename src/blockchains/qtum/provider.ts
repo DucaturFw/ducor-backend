@@ -1,3 +1,5 @@
+import { QtumRPC, Contract } from "qtumjs";
+
 export interface IQtumWatcherOptions {
   qtumProvider: string
   masterAddress: string
