@@ -6,8 +6,11 @@
   "author": "zlumer <zlumer@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "postinstall": "rm -f node_modules/web3/*.d.ts",
     "start": "ts-node src/app.ts",
-    "test": "jest"
+    "test-tsc": "tsc --noEmit",
+    "test": "jest",
+    "ci": "yarn test-tsc && yarn test"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",

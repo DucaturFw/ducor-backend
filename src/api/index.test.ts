@@ -1,7 +1,7 @@
 import { CONFIG, app } from "."
 import { makeConfig, generate } from "./configurator"
 import { Server } from "http"
-import { init } from "../reverse_map"
+import { init as reverseMapInit } from "../reverse_map"
 import axios from "axios"
 
 import "jest-extended"
@@ -16,7 +16,7 @@ describe('api responses', () =>
 	let server: Server
 	beforeAll(done =>
 	{
-		server = app.listen(40789, () => init().then(x => (makeConfig(), x)).then(done))
+		server = app.listen(40789, () => reverseMapInit().then(x => (makeConfig(), x)).then(done))
 	})
 	afterAll(done =>
 	{
@@ -96,7 +96,7 @@ describe('api responses', () =>
 				CONFIG.config = await makeConfig()
 				CONFIG.generate = generate
 
-				let res = await axios(`${URL}/generate/${blockchain}/crypto/${exch}/ETH%2FBTC?updatefreq=100&lifetime=1000`)
+				let res = await axios(`${URL}/generate/${blockchain}/crypto/${exch}?updatefreq=100&lifetime=1000&config=%7B%22pair%22%3A%22ETH%2FBTC%22%7D`)
 				expect(res.status).toEqual(200)
 				let data = res.data
 				expect(data).toContainAllKeys(['contract', 'instructions'])

@@ -1,9 +1,6 @@
 import "jest-extended"
-import {
-    decimalsMapper, FLOAT_PRECISION, IWideDataType,
-    PUSH_CONSTRUCTION
-} from "./consts";
-import {IDataType} from "../../IOracleData";
+import { decimalsMapper, FLOAT_PRECISION, IWideDataType, PUSH_CONSTRUCTION } from "./consts"
+import { IDataType } from "../../../IOracleData"
 
 describe("Regression test for evaluator", () => {
     /// for all types

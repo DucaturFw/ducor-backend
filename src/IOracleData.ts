@@ -11,11 +11,11 @@ export type IOracleData =
   | IDataGeneric<"string", string>
   | IDataGeneric<"price", { price: number; decimals: number }>
 
-type FlatObj = { [key: string]: string | number | boolean }
+export type IFlatObj = { [key: string]: string | number | boolean }
 export interface IDataHashSource {
   category: string
   provider: string
-  ident: string
+  config: IFlatObj
 }
 
 export interface IDataDefinition extends IDataHashSource {

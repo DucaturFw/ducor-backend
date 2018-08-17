@@ -19,16 +19,15 @@ export let generators = {
 
 }
 
-export let generate: IConfigGenerateFunction = ({ blockchain, category, slug, lifetime, provider, updatefreq }) => {
-	let type = types[provider as keyof typeof types](slug)
-	let name = slug.replace(/\W/gi, '').toLowerCase()
-	let hash = hashDataId({ category, provider, ident: slug })
+export let generate: IConfigGenerateFunction = ({ blockchain, category, config, lifetime, provider, updatefreq }) => {
+	let type = types[provider as keyof typeof types](config)
+	let hash = hashDataId({ category, provider, config })
 	if (!getDataDefByHash(hash))
 		return {
 			contract: "ERROR",
-			instructions: `ERROR! hash "${hash}" not found!\n${blockchain}|${category}|${slug}|${provider}|${updatefreq}`
+			instructions: `ERROR! hash "${hash}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
 		}
-	let e: IContractEndpointSettings = { name, type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash }
+	let e: IContractEndpointSettings = { ...type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash }
 	let generator = generators[blockchain as keyof typeof generators]
 	if (!generator)
 		return { contract: "...", instructions: "..." }
@@ -63,7 +62,12 @@ export async function makeConfig(): Promise<IConfigFunction>
 				name: "sports"
 			},
 			{
-				name: "random"
+				name: "random",
+				types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })(),
+				providers: [
+					{ id: "number", name: "Single random number", types: (() => { let arr = []; for (let i = 0; i < 10000; i++) { arr[i] = `${i}` } return arr })() },
+					// { id: "array", name: "Array of random numbers", types:  }
+				]
 			}
 		],
 	})

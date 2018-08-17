@@ -1,4 +1,5 @@
 import { getDataDefByHash, init } from "./reverse_map"
+import { hash } from "./utils/hasher"
 
 beforeAll(async () => await init())
 
@@ -12,18 +13,28 @@ describe("reverse_map migration", () =>
 		expect(data.provider).toEqual('binance')
 		expect(data.category).toEqual('crypto')
 		// expect(data.hash).toEqual() // what should be in hash? old one or new one?
-		expect(data.ident).toEqual('ETH/BTC')
+		expect(data.config).toEqual({ pair: 'ETH/BTC' })
 	})
 })
 describe("reverse_map data ids", () =>
 {
 	it('should return LTC/BTC', async () =>
 	{
-		let data = await getDataDefByHash("7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542")
+		let data = await getDataDefByHash("f778e7fa5b6ece80662b34fd629efea910dc1cf6c0abef62e4bb288daeca6cfb")
+		expect(data).toBeDefined()
 		expect(data.category).toEqual('crypto')
 		expect(data.provider).toEqual('binance')
-		expect(data.hash).toEqual('7323b6bf968dc6181e6a8736a66f0de0fa536ed530e07a48d60a670d1084f542')
+		expect(data.hash).toEqual('f778e7fa5b6ece80662b34fd629efea910dc1cf6c0abef62e4bb288daeca6cfb')
 		expect(data.type).toEqual('price')
-		expect(data.ident).toEqual('LTC/BTC')
+		expect(data.config).toEqual({ pair: 'LTC/BTC' })
+	})
+	it('should return random values', async () =>
+	{
+		let data = await getDataDefByHash(hash("random/number:"))
+		expect(data).toBeDefined()
+		expect(data.category).toEqual("random")
+		expect(data.provider).toEqual("number")
+		expect(data.type).toEqual("uint")
+		expect(data.config).toEqual({})
 	})
 })
