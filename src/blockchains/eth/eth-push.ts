@@ -100,42 +100,45 @@ async function pushContract(receiver: string, type: string, hash: string, ...arg
 async function pushPrice(
   contract: string,
   hash: string,
-  data: IDataGeneric<"price", { price: number; decimals: number }>
+  data: IDataGeneric<"price", { price: number; decimals: number }>,
+  memo: string = '',
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "price", hash, data.data.price, data.data.decimals)
+  return pushContract(contract, "price", hash, data.data.price, data.data.decimals, memo)
 }
 
 async function pushInt(
   contract: string,
   hash: string,
-  data: IDataGeneric<"int", number>
+  data: IDataGeneric<"int", number>,
+  memo: string = '',
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "int", hash, data.data)
+  return pushContract(contract, "int", hash, data.data, memo)
 }
 async function pushUint(
   contract: string,
   hash: string,
-  data: IDataGeneric<"uint", number>
+  data: IDataGeneric<"uint", number>,
+  memo: string = '',
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "uint", hash, data.data)
+  return pushContract(contract, "uint", hash, data.data, memo)
 }
 
 export async function push(
   contract: string,
   hash: string,
   data: IOracleData,
-  memo?: string
+  memo: string = '',
 ) : Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
-      return pushPrice(contract, hash, data)
+      return pushPrice(contract, hash, data, memo)
     case "int":
-      return pushInt(contract, hash, data)
+      return pushInt(contract, hash, data, memo)
     case "uint":
-      return pushUint(contract, hash, data)
+      return pushUint(contract, hash, data, memo)
     default:
       throw new Error("Not implemented data type: " + data.type)
   }
