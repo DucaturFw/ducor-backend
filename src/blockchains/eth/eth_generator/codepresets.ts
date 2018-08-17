@@ -105,7 +105,7 @@ class Data {
     getGetters() {
         return Object
             .entries(this.data)
-            .map(([hash, dt]) => getGetter(dt.value.name, hash, dt.value.type, dt.value.args))
+            .map(([hash, dt]) => getGetter(dt.value.name, hash, dt.value.type, dt.value.args || []))
             .reduce((prev, curr) => prev + '\n\n    ' + curr);
     }
 
