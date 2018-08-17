@@ -102,9 +102,10 @@ async function pushPrice(
   hash: string,
   data: IDataGeneric<"price", { price: number; decimals: number }>,
   memo: string = '',
+  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "price", hash, data.data.price, data.data.decimals, memo)
+  return pushC(contract, "price", hash, data.data.price, data.data.decimals, memo)
 }
 
 async function pushInt(
@@ -112,18 +113,21 @@ async function pushInt(
   hash: string,
   data: IDataGeneric<"int", number>,
   memo: string = '',
+  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "int", hash, data.data, memo)
+  return pushC(contract, "int", hash, data.data, memo)
 }
+
 async function pushUint(
   contract: string,
   hash: string,
   data: IDataGeneric<"uint", number>,
   memo: string = '',
+  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushContract(contract, "uint", hash, data.data, memo)
+  return pushC(contract, "uint", hash, data.data, memo)
 }
 
 export async function push(
@@ -131,14 +135,15 @@ export async function push(
   hash: string,
   data: IOracleData,
   memo: string = '',
+  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
 ) : Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
-      return pushPrice(contract, hash, data, memo)
+      return pushPrice(contract, hash, data, memo, pushC)
     case "int":
-      return pushInt(contract, hash, data, memo)
+      return pushInt(contract, hash, data, memo, pushC)
     case "uint":
-      return pushUint(contract, hash, data, memo)
+      return pushUint(contract, hash, data, memo, pushC)
     default:
       throw new Error("Not implemented data type: " + data.type)
   }
