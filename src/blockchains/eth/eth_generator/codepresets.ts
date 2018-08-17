@@ -4,7 +4,8 @@ import {
     MASTER_CONTRACT_DEFINITION,
     IETHType,
     IETHDataType,
-    IWideDataType
+    IWideDataType,
+    IArg,
 } from "./consts";
 
 export const getMasterContract = () => {
@@ -14,14 +15,23 @@ export const getMasterContract = () => {
 export const getPushFunction = (binding: string, type: IETHType) => {
     const { inputs, value } = PUSH_CONSTRUCTION[type];
     return `
-    function push_data_${type}(string name, ${inputs.map(inp => `${inp.type} ${inp.name}`).join(', ')}) onlyDataPublisher public {
+    function push_data_${type}(string name, ${inputs.map(inp => `${inp.type} ${inp.name}`).join(', ')}, string memo) onlyDataPublisher public {
         ${binding}[name].last_update = block.number;
         ${getTypeBinding(type)}[name] = ${value};
     }`
 }
 
-export const getGetter = (name: string, hash: string, type: IETHType) => {
-    return `function get${name}() dataFresh("${hash}") public returns (${PUSH_CONSTRUCTION[type].rettype || type}) {
+export const cleanName = (name: string, ignore: RegExp = /[-!$%@#^&*()_+|~=`{}\[\]:";'<>?,.\\\/]/g) => name.replace(ignore, '')
+
+const argFormatter = (args: IArg[]) => args.map(arg => `${arg.type} ${arg.name}`).join(', ')
+
+export const getGetter = (name: string, hash: string, type: IETHType, args: IArg[]) => {
+    return (args && args.length > 0)
+        ? `function request${cleanName(name)}(string memo, ${argFormatter(args)}) private {
+        int[] memory args = [${args.map(arg => `int(${arg.name})`).join(', ')}];
+        request_data_args("${hash}", memo, args);
+    }`
+        : `function get${cleanName(name)}() dataFresh("${hash}") public returns (${PUSH_CONSTRUCTION[type].rettype || type}) {
         if (!check_data_age("${hash}")) {
             request_data("${hash}");
         }
@@ -33,6 +43,7 @@ const toDataType = (d: IWideDataType) => <IETHDataType>({
     type: d.type,
     name: d.name,
     hash: d.hash,
+    args: d.args,
     decimals: d.decimals || 0,
     value: PUSH_CONSTRUCTION[d.type].evaluate(d)
 })
@@ -65,8 +76,10 @@ class Data {
         let timings = '';
         if (!value.value) {
             timings = `${this.binding}["${name}"] = Data(${update}, ${life}, 0);`;
-            timings += `
+            if (!value.args || !(value.args.length > 0)) {
+                timings += `
         request_data("${name}");`;
+            }
         } else {
             timings = `${this.binding}["${name}"] = Data(${update}, ${life}, block.number);`;
             timings += `
@@ -92,7 +105,7 @@ class Data {
     getGetters() {
         return Object
             .entries(this.data)
-            .map(([hash, dt]) => getGetter(dt.value.name, hash, dt.value.type))
+            .map(([hash, dt]) => getGetter(dt.value.name, hash, dt.value.type, dt.value.args || []))
             .reduce((prev, curr) => prev + '\n\n    ' + curr);
     }
 
@@ -109,7 +122,7 @@ export const getContractBase = (name: string, inputs: IWideDataType[]) => {
     const data = new Data(binding);
     inputs.forEach(inp => {
         if (!inp.update || !inp.life || !inp.hash) throw new Error(`Not specified life, update or hash for ${inp.name}.`);
-        if (inp.update >= inp.life) throw new Error(`Update frequency could not be greater or equal to life for ${inp.name}.`)
+        if (inp.update > inp.life) throw new Error(`Update frequency could not be greater or equal to life for ${inp.name}.`)
         data.addDataType(inp, inp.update, inp.life);
     });
 
@@ -166,12 +179,17 @@ contract ${name} {
 
     function request_data_manually(string name) nonEmptyLife(name) dataAntique(name) public {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "");
     }
 
     function request_data(string name) nonEmptyLife(name) dataNeedRefresh(name) private {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "");
+    }
+
+    function request_data_args(string name, string memo, int[] memory args) private {
+        MasterOracle master = MasterOracle(data_provider);
+        master.request_data_args(name, this, memo, args);
     }
     
     ${data.getGetters()}
