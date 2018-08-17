@@ -4,7 +4,7 @@ import { ITxPushResult } from "../../IBlockchain"
 import { getContract, getOptions, getQtumRPC } from "./provider";
 import { push as ethPush } from "../eth/eth-push";
 
-async function pushContract(receiver: string, type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
+async function pushDataQtum(receiver: string, type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
   // todo: cache options and rpc
   const opts = getOptions();
   const qtumrpc = getQtumRPC(opts.qtumProvider, opts.oraclePublicKey, opts.oraclePrivateKey);
@@ -12,7 +12,7 @@ async function pushContract(receiver: string, type: string, hash: string, ...arg
   
   console.log(`push_data_${type}`, hash, ...args)
   const tx = await instance.send(`push_data_${type}`,[hash, ...args]);
-  const confirmation = await tx.confirm(3)
+  const confirmation = await tx.confirm(3); // wait for 3 confirmations
 
   return {
     txhash: confirmation.transactionHash,
@@ -26,5 +26,5 @@ export async function push(
   data: IOracleData,
   memo: string = '',
 ) {
-  return ethPush(contract, hash, data, memo, pushContract);
+  return ethPush(contract, hash, data, memo, pushDataQtum);
 }

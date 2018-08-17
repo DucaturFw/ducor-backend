@@ -74,7 +74,7 @@ function getContract(connection : Web3, abi: any[], address: string) : Contract{
   return new connection.eth.Contract(abi, address);
 }
 
-async function pushContract(receiver: string, type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
+async function pushDataEth(receiver: string, type: string, hash: string, ...args: any[]) : Promise<ITxPushResult<boolean>> {
   const opts = getOptions();
   const web3provider = getWSProvider(opts.web3provider);
   const web3 = getWeb3(web3provider, opts.oraclePrivateKey);
@@ -102,10 +102,10 @@ async function pushPrice(
   hash: string,
   data: IDataGeneric<"price", { price: number; decimals: number }>,
   memo: string = '',
-  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
+  pushData: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>>,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushC(contract, "price", hash, data.data.price, data.data.decimals, memo)
+  return pushData(contract, "price", hash, data.data.price, data.data.decimals, memo)
 }
 
 async function pushInt(
@@ -113,10 +113,10 @@ async function pushInt(
   hash: string,
   data: IDataGeneric<"int", number>,
   memo: string = '',
-  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
+  pushData: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>>,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushC(contract, "int", hash, data.data, memo)
+  return pushData(contract, "int", hash, data.data, memo)
 }
 
 async function pushUint(
@@ -124,10 +124,10 @@ async function pushUint(
   hash: string,
   data: IDataGeneric<"uint", number>,
   memo: string = '',
-  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
+  pushData: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>>,
 ) : Promise<ITxPushResult<boolean>> {
 
-  return pushC(contract, "uint", hash, data.data, memo)
+  return pushData(contract, "uint", hash, data.data, memo)
 }
 
 export async function push(
@@ -135,15 +135,15 @@ export async function push(
   hash: string,
   data: IOracleData,
   memo: string = '',
-  pushC: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushContract,
+  pushData: (receiver: string, type: string, hash: string, ...args: any[]) => Promise<ITxPushResult<boolean>> = pushDataEth,
 ) : Promise<ITxPushResult<boolean>> {
   switch (data.type) {
     case "price":
-      return pushPrice(contract, hash, data, memo, pushC)
+      return pushPrice(contract, hash, data, memo, pushData)
     case "int":
-      return pushInt(contract, hash, data, memo, pushC)
+      return pushInt(contract, hash, data, memo, pushData)
     case "uint":
-      return pushUint(contract, hash, data, memo, pushC)
+      return pushUint(contract, hash, data, memo, pushData)
     default:
       throw new Error("Not implemented data type: " + data.type)
   }
