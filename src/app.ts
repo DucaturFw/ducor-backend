@@ -3,6 +3,7 @@ require('dotenv').config()
 import { start as fakeRead, push as fakePush } from "./blockchains/fake"
 import { start as eosRead, push as eosPush } from "./blockchains/eos"
 import { start as ethRead, push as ethPush } from "./blockchains/eth"
+import { start as qtumRead, push as qtumPush } from "./blockchains/qtum"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash } from "./reverse_map"
 import { providers } from "./providers"
@@ -14,11 +15,15 @@ console.log("hello")
 
 let readers = [
 	eosRead, 
-	ethRead
+	ethRead,
+	qtumRead,
+	fakeRead
 ]
 let writers = {
 	eos: eosPush,
-	eth: ethPush
+	eth: ethPush,
+	qtum: qtumPush,
+	fake: fakePush,
 }
 
 export let onRequest: RequestHandler = async req => {

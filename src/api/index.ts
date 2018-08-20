@@ -7,7 +7,7 @@ export let CONFIG = {
 	generate: ({blockchain, category, provider, config, updatefreq, lifetime}: {
 		blockchain: string
 		category: string
-		config: {}
+		config: any
 		provider: string
 		updatefreq: string
 		lifetime: string

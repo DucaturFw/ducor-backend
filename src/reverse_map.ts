@@ -1,30 +1,27 @@
 import { IDataDefinition, IDataType, IDataHashSource } from "./IOracleData"
-import { matcher as binanceMatcher } from "./providers/crypto/binance"
-import { matcher as bitfinexMatcher } from "./providers/crypto/bitfinex";
 import { hashDataId } from "./utils/hasher"
+import { IPairMatcher } from "./providers/crypto/IPairMatcher"
+import { exchanges } from "./providers"
 
 let dataDefinitions: { [key: string]: IDataDefinition } = {}
 
 export async function init()
 {
-	dataDefinitions = (await binanceMatcher.listPairsCanonical())
+	let cryptoExch = async (matcher: IPairMatcher, name: string) => (await matcher.listPairsCanonical())
 		.map(x => x.join('/'))
-		.map(x => ({ category: "crypto", provider: "binance", config: { pair: x }, type: "price" as IDataType}))
+		.map(x => ({ category: "crypto", provider: name, config: { pair: x }, type: "price" as IDataType}))
 		.map(x => ({ ...x, hash: hashDataId(x) }))
-		.reduce((acc, cur) => ({ ...acc, [cur.hash]: cur }), dataDefinitions)
+		.reduce((acc, cur) => ((acc[cur.hash] = cur), acc), { } as { [key: string]: IDataDefinition })
 	
-	dataDefinitions["363e7fe8b47534460fd06dafd5e18a542fe1aaa78038d7ca5e84694f99a788e5"] = dataDefinitions[hashDataId({
-		category: "crypto",
-		config: { pair: "ETH/BTC" },
-		provider: "binance"
-	})]
-
-	dataDefinitions = (await bitfinexMatcher.listPairsCanonical())
-		.map(x => x.join('/'))
-		.map(x => ({ category: "crypto", provider: "bitfinex", config: { pair: x }, type: "price" as IDataType}))
-		.map(x => ({ ...x, hash: hashDataId(x) }))
-		.reduce((acc, cur) => ({ ...acc, [cur.hash]: cur }), dataDefinitions)
+	let addHashes = async (matcher: IPairMatcher, name: string) =>
+	{
+		let hashes = await cryptoExch(matcher, name)
+		console.log(`added ${Object.keys(hashes).length} hashes from ${name}`)
+		return hashes
+	}
 	
+	let matches = await Promise.all(exchanges.map(x => addHashes(x.matcher, x.exchange.id)))
+	Object.assign(dataDefinitions, ...matches)
 	
 	let obj: IDataHashSource = { category: "random", provider: "number", config: {} }
 	let hash = hashDataId(obj)

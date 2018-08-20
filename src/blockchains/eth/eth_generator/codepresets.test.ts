@@ -1,14 +1,18 @@
 import "jest-extended"
-import { getContractBase } from './codepresets'
+import {cleanName, getContractBase} from './codepresets'
 import {IWideDataType} from "./consts";
 const EXAMPLE_CONTRACT = `pragma solidity ^0.4.24;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract MasterOracle is Ownable {
-    event DataRequest(string name, address receiver);
-    function request_data(string name, address receiver) public {
-        emit DataRequest(name, receiver);
+    event DataRequest(string name, address receiver, string memo);
+    event DataRequest(string name, address receiver, string memo, int[] params);
+    function request_data(string name, address receiver, string memo) public {
+        emit DataRequest(name, receiver, memo);
+    }
+    function request_data_args(string name, address receiver, string memo, int[] params) public {
+        emit DataRequest(name, receiver, params, memo);
     }
 }
 
@@ -27,6 +31,7 @@ contract test_contract {
     }
     mapping(string => uint) u_data;
     mapping(string => Price) p_data;
+    mapping(string => int) i_data;
     mapping(string => Data) data_timings;
 
     constructor(address master_oracle, address data_pub) {
@@ -38,6 +43,7 @@ contract test_contract {
         request_data("req");
         data_timings["nih"] = Data(5, 100, block.number);
         p_data["nih"] = Price(12345, 2);
+        data_timings["SuperRandomizedHash"] = Data(1, 1, 0);
     }
 
     modifier onlyDataPublisher() {
@@ -75,24 +81,34 @@ contract test_contract {
         return block.number < (data_timings[name].last_update + data_timings[name].update_time);
     }
 
-    function push_data_uint(string name, uint value) onlyDataPublisher public {
+    function push_data_uint(string name, uint value, string memo) onlyDataPublisher public {
         data_timings[name].last_update = block.number;
         u_data[name] = value;
     }
 
-    function push_data_price(string name, uint value, uint8 decimals) onlyDataPublisher public {
+    function push_data_price(string name, uint value, uint8 decimals, string memo) onlyDataPublisher public {
         data_timings[name].last_update = block.number;
         p_data[name] = Price(value, decimals);
     }
 
+    function push_data_int(string name, int value, string memo) onlyDataPublisher public {
+        data_timings[name].last_update = block.number;
+        i_data[name] = value;
+    }
+
     function request_data_manually(string name) nonEmptyLife(name) dataAntique(name) public {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "");
     }
 
     function request_data(string name) nonEmptyLife(name) dataNeedRefresh(name) private {
         MasterOracle master = MasterOracle(data_provider);
-        master.request_data(name, this);
+        master.request_data(name, this, "");
+    }
+
+    function request_data_args(string name, string memo, int[] memory args) private {
+        MasterOracle master = MasterOracle(data_provider);
+        master.request_data_args(name, this, memo, args);
     }
 
     function getAloha() dataFresh("alh") public returns (uint) {
@@ -108,12 +124,17 @@ contract test_contract {
         }
         return u_data["req"];
     }
-    
+
     function getNihao() dataFresh("nih") public returns (uint) {
         if (!check_data_age("nih")) {
             request_data("nih");
         }
         return p_data["nih"].value;
+    }
+
+    function requestrand(string memo, int from, int to) private {
+        int[] memory args = [int(from), int(to)];
+        request_data_args("SuperRandomizedHash", memo, args);
     }
 }`.replace(/\x20+$/gm, "");
 
@@ -124,6 +145,7 @@ describe('ETH Contract constructor', () => {
                 { hash: 'alh', name: 'Aloha', value: 100, type: 'uint', life: 10, update: 2 },
                 { hash: 'req', name: 'Req', type: 'uint', life: 10, update: 3 },
                 { hash: 'nih', name: 'Nihao', value: 12345, decimals: 2, type: 'price', life: 100, update: 5 },
+                { hash: 'SuperRandomizedHash', name: 'rand', args: [{name: 'from', type: 'int'}, {name: 'to', type: 'int'}], type: 'int', life: 1, update: 1 },
             ]
         );
         expect(created).toEqual(EXAMPLE_CONTRACT);
@@ -143,5 +165,12 @@ describe('ETH Contract constructor', () => {
     it(`should fire exception on update > life`, () => {
         expect(() => getContractBase('name', [{ value: 0, name: 'name', type: 'int', hash: 'exist', update: 100, life: 10 }]))
         .toThrow(`Update frequency could not be greater or equal to life for name.`);
+    })
+})
+
+describe('Helper function tests', () => {
+    it('should ignore symbols in names', () => {
+        expect(cleanName('some/name/yeah')).toEqual('somenameyeah')
+        expect(cleanName('so@me%na#me^y$eah')).toEqual('somenameyeah')
     })
 })

@@ -1,78 +1,89 @@
-[
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "name": "s_value",
-        "type": "string"
-      }
-    ],
-    "name": "push_data_str",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "name": "value",
-        "type": "int256"
-      }
-    ],
-    "name": "push_data",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "name": "decimals",
-        "type": "uint8"
-      }
-    ],
-    "name": "push_data_price",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "name": "value",
-        "type": "uint256"
-      }
-    ],
-    "name": "push_data_uint",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+[{
+        "constant": false,
+        "inputs": [{
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "s_value",
+                "type": "string"
+            },
+            {
+                "name": "memo",
+                "type": "string"
+            }
+        ],
+        "name": "push_data_str",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [{
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "value",
+                "type": "int256"
+            },
+            {
+                "name": "memo",
+                "type": "string"
+            }
+        ],
+        "name": "push_data_int",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [{
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "value",
+                "type": "uint256"
+            },
+            {
+                "name": "decimals",
+                "type": "uint8"
+            },
+            {
+                "name": "memo",
+                "type": "string"
+            }
+        ],
+        "name": "push_data_price",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [{
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "name": "value",
+                "type": "uint256"
+            },
+            {
+                "name": "memo",
+                "type": "string"
+            }
+        ],
+        "name": "push_data_uint",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
 ]
