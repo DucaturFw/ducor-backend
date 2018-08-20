@@ -13,7 +13,7 @@ export interface IEthereumWatcherOptions {
   rethinkTable: string
 }
 
-function assertEnv() {
+export function assertEnv() {
   console.assert(
     process.env.DUCOR_ETH_PROVIDER,
     "DUCOR_ETH_PROVIDER is required"
@@ -31,7 +31,7 @@ function assertEnv() {
     "DUCOR_EOS_RETHINKDATABASE not found in .env!"
   )
   console.assert(
-    process.env.DUCOR_EOS_RETHINKTABLE,
+    process.env.DUCOR_ETH_RETHINKTABLE,
     "DUCOR_EOS_RETHINKTABLE not found in .env!"
   )
 }
@@ -45,7 +45,7 @@ function getOptions(): IEthereumWatcherOptions {
     rethinkHost: process.env.DUCOR_EOS_RETHINKHOST!,
     rethinkPort: parseInt(process.env.DUCOR_EOS_RETHINKPORT!),
     rethinkDB: process.env.DUCOR_EOS_RETHINKDATABASE!,
-    rethinkTable: process.env.DUCOR_EOS_RETHINKTABLE!
+    rethinkTable: process.env.DUCOR_ETH_RETHINKTABLE!
   }
 }
 
