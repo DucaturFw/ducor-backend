@@ -7,7 +7,20 @@ import { mapObject } from "../utils/map_object"
 export let exchanges = [
 	ccxt.binance,
 	ccxt.bitfinex,
-	ccxt.hitbtc
+	ccxt.hitbtc,
+	ccxt.bittrex,
+	ccxt.theocean,
+	ccxt.cex,
+	ccxt.cobinhood,
+	ccxt.coinbase,
+	ccxt.coinmarketcap,
+	ccxt.exmo,
+	ccxt.gdax,
+	ccxt.huobi,
+	ccxt.kraken,
+	ccxt.okex,
+	ccxt.poloniex,
+	ccxt.yobit,
 ].map(x => new x()).map(generateProvider)
 
 export let exchangesMap = exchanges.reduce((acc, cur) => ((acc[cur.exchange.id] = cur), acc), { } as { [key: string]: IExchangeProvider })
