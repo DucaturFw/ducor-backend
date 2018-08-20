@@ -2,6 +2,12 @@ import { IBlockchainReader, IBlockchainPusher } from "../../IBlockchain"
 import Eos, { EosInstance } from "eosjs"
 import r from "rethinkdb"
 
+export enum TaskMode {
+  Disabled,
+  Repeatable,
+  Once
+}
+
 export interface ITask {
   id: string
   task: string
@@ -9,7 +15,8 @@ export interface ITask {
   args: string,
   contract: string
   timestamp: number
-  active: boolean
+  update_each: number
+  mode: TaskMode
 }
 
 
@@ -113,7 +120,6 @@ async function getTasks(eosOptions: any, master: string): Promise<ITask[]> {
   const response = await getTable(eos, master, master, "request")
   return response.rows.map<ITask>((r: any) => ({
     ...r,
-    active: r.active === 1,
     id: r.task + r.contract
   }))
 }
@@ -193,16 +199,32 @@ export const start: IBlockchainReader = async listener => {
 
     try {
       await Promise.all(
-        tasks.filter(t => t.active).map(t =>
-          listener({
-            dataHash: t.task,
-            requestId: t.id,
-            receiver: t.contract,
-            blockchain: "eos",
-            timestamp: new Date().getTime(),
-            args: t.args.split(';'),
-            memo: t.memo
-          })
+        tasks.filter(t => {
+          log('validate task', t)
+          if (t.mode === 0) {
+            log('inactive task')
+            return false;
+          }
+
+          const now = Math.floor(new Date().getTime() / 1000);
+          if (now < t.timestamp + t.update_each) {
+            log('too early to update', now, t.timestamp + t.update_each)
+            return false;
+          }
+
+          return true;
+        }).map(t => {
+            log('push request', t)
+            listener({
+              dataHash: t.task,
+              requestId: t.id,
+              receiver: t.contract,
+              blockchain: "eos",
+              timestamp: new Date().getTime(),
+              args: t.args.split(';'),
+              memo: t.memo
+            })
+          }
         )
       )
     } catch(e) {
