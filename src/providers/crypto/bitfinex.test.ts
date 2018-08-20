@@ -1,11 +1,12 @@
 import "jest-extended"
 
-import { request as requestBitfinex } from "./bitfinex"
+import { providers } from "../"
 
 describe("bitfinex tests", () =>
 {
 	it('should have bitfinex data', async () =>
 	{
+		let requestBitfinex = providers.crypto["bitfinex"]
 		let result = await requestBitfinex({ pair: "ETH/BTC" })
 		expect(result.type).toEqual("price")
 		if (result.type != "price")
