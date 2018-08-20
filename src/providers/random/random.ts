@@ -1,4 +1,4 @@
-import { IDataProvider } from "../../IDataProvider"
+import { IDataProvider, ITypeProvider } from "../../IDataProvider"
 import { IOracleData } from "../../IOracleData"
 
 let random = (limit: number) => Math.floor(Math.random() * limit)
@@ -12,3 +12,4 @@ export let getArray: IDataProvider<{}, [number, number, number]> = (config, min,
 	
 	return Promise.resolve({ type: "bytes", data: Buffer.from(numbers) } as IOracleData)
 }
+export let getType: ITypeProvider<{ multi: boolean }> = config => config.multi ? { type: "bytes", name: "randomBytes" } : { type: "int", name: "singleNumber" }

@@ -9,6 +9,7 @@ import { contract as eosContract } from "../blockchains/eos"
 import { contract as ethContract } from "../blockchains/eth"
 
 import { exchanges } from "../providers"
+import { ITypeProvider } from "../IDataProvider"
 
 export let generators = {
 	fake: fakeContract,
@@ -18,8 +19,21 @@ export let generators = {
 
 }
 
-export let generate: IConfigGenerateFunction = ({ blockchain, category, config, lifetime, provider, updatefreq }) => {
-	let type = types[provider as keyof typeof types](config)
+export let generate: IConfigGenerateFunction = ({ blockchain, category, config, lifetime, provider, updatefreq }) =>
+{
+	let cat = types[category as keyof typeof types]
+	if (!cat)
+		return {
+			contract: "ERROR",
+			instructions: `ERROR! category "${category}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
+		}
+	let getType = cat[provider as keyof typeof cat] as ITypeProvider<any>
+	if (!getType)
+		return {
+			contract: "ERROR",
+			instructions: `ERROR! provider "${provider}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
+		}
+	let type = getType(config)
 	let hash = hashDataId({ category, provider, config })
 	if (!getDataDefByHash(hash))
 		return {
@@ -29,7 +43,7 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, config, 
 	let e: IContractEndpointSettings = { ...type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash }
 	let generator = generators[blockchain as keyof typeof generators]
 	if (!generator)
-		return { contract: "...", instructions: "..." }
+		return { contract: "ERROR", instructions: `ERROR! generator not found for ${blockchain}\n${blockchain}|${category}|${config}|${provider}|${updatefreq}` }
 
 	return {
 		contract: generator([e]),
@@ -63,10 +77,10 @@ export async function makeConfig(): Promise<IConfigFunction>
 			},
 			{
 				name: "random",
-				types: ["simple", "secure", "random-org"],
+				types: ["number", "array"],
 				providers: [
-					{ id: "number", name: "Single random number", types: ["simple", "secure", "random-org"] },
-					// { id: "array", name: "Array of random numbers", types:  }
+					{ id: "simple", name: "Simple random number generator", types: ["number"] },
+					// { id: "random-org", name: "Random numbers from random.org", types:  }
 				]
 			}
 		],

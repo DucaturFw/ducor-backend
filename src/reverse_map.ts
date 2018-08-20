@@ -23,12 +23,12 @@ export async function init()
 	let matches = await Promise.all(exchanges.map(x => addHashes(x.matcher, x.exchange.id)))
 	Object.assign(dataDefinitions, ...matches)
 	
-	let obj: IDataHashSource = { category: "random", provider: "number", config: {} }
+	let obj: IDataHashSource = { category: "random", provider: "simple", config: { } }
 	let hash = hashDataId(obj)
 	dataDefinitions[hash] = { ...obj, type: "uint", hash }
 }
 
-export let getDataDefByHash = async (hash: string): Promise<IDataDefinition> =>
+export let getDataDefByHash = (hash: string): IDataDefinition =>
 {
 	return dataDefinitions[hash]
 }
