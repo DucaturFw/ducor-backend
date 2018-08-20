@@ -1,6 +1,7 @@
 import { request as fake } from "./fake"
 import { request as binance } from "./crypto/binance"
 import { request as bitfinex } from "./crypto/bitfinex"
+import { request as hitbtc } from "./crypto/hitbtc"
 import { getArray as randomArray, getInteger as randomInt } from "./random/random"
 
 export let providers = {
@@ -8,6 +9,7 @@ export let providers = {
 		fake,
 		binance,
 		bitfinex,
+		hitbtc,
 	},
 	random: {
 		number: randomInt,
