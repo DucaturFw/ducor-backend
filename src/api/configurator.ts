@@ -51,22 +51,29 @@ export let generate: IConfigGenerateFunction = ({ blockchain, category, config, 
 	}
 }
 
-export async function makeConfig(): Promise<IConfigFunction>
+let cachedConfig: IConfigFunction
+
+export async function makeConfig(bypassCache = false): Promise<IConfigFunction>
 {
+	if (!bypassCache && cachedConfig)
+		return Promise.resolve(cachedConfig)
+	
 	let providers = await Promise.all(exchanges.map(async x => ({
 		id: x.exchange.id,
 		name: x.exchange.name,
 		types: (await x.matcher.listPairsCanonical()).map(x => x.join('/'))
 	})))
+	
 	let flatten = <T>(arr: T[][]) => arr.reduce((acc, val) => acc.concat(val), [])
 
 	let unique = (arr: string[]) => Object.keys(arr.reduce((acc, cur) => acc[cur] = acc, {} as {[key: string]: any}))
+	let types = unique(flatten(providers.map(x => x.types)))
 
 	let config: IConfigFunction = () => ({
 		categories: [
 			{
 				name: "crypto",
-				types: unique(flatten(providers.map(x => x.types))),
+				types,
 				providers
 			},
 			{
@@ -85,5 +92,7 @@ export async function makeConfig(): Promise<IConfigFunction>
 			}
 		],
 	})
+	if (!bypassCache)
+		cachedConfig = config
 	return config
 }
