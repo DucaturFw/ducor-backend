@@ -4,7 +4,7 @@ import eosPush from "./eos-push"
 
 export let contract: IContractGenerator = endpoints => gen(feed(endpoints))
 
-let gen = require("./eos-js-gen.js")
+let gen = require("./eosgenerator.js")
 
 let epToProv = (e: IContractEndpointSettings) => {
   return {
