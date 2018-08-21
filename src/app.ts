@@ -40,10 +40,10 @@ export let onRequest: RequestHandler = async req => {
 	return tx.result
 }
 
-let stoppers = readers.forEach(r => r(onRequest))
 
 Promise.all([makeConfig(), initReverseMap()]).then(([config]) =>
 {
+	let stoppers = readers.forEach(r => r(onRequest))
 	apiConfig.config = config
 	apiConfig.generate = generate
 
