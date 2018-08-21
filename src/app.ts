@@ -5,7 +5,7 @@ import { start as eosRead, push as eosPush } from "./blockchains/eos"
 import { start as ethRead, push as ethPush } from "./blockchains/eth"
 import { start as qtumRead, push as qtumPush } from "./blockchains/qtum"
 import { RequestHandler } from "./IBlockchain"
-import { getDataDefByHash } from "./reverse_map"
+import { getDataDefByHash, init as initReverseMap } from "./reverse_map"
 import { providers } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
 import { generate, makeConfig } from "./api/configurator"
@@ -42,7 +42,7 @@ export let onRequest: RequestHandler = async req => {
 
 let stoppers = readers.forEach(r => r(onRequest))
 
-makeConfig().then(config =>
+Promise.all([makeConfig(), initReverseMap()]).then(([config]) =>
 {
 	apiConfig.config = config
 	apiConfig.generate = generate
