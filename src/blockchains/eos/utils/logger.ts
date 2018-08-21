@@ -15,7 +15,7 @@ function getLogChannels(conf?: string): string[] {
 }
 
 const getOptions = (): ILoggerOptions => ({
-  channels: getLogChannels(process.env.DEBUG)
+  channels: getLogChannels(process.env.LOG_LEVEL)
 })
 
 function genericLog(channel: string, message?: any, ...optionalParams: any[]) {
