@@ -49,15 +49,19 @@ function getOptions() : IEosPushOptions {
 }
 
 function pack(instance : IEosContract, data : IOracleData) : Buffer {
+  console.log(data)
   switch(data.type) {
     case "bytes":
       return instance.fc.toBuffer('bytes', data.data);
     case "price":
-      return instance.fc.toBuffer('price', data.data);
+      return instance.fc.toBuffer('price', {
+        value: data.data.price, 
+        decimals: data.data.decimals
+      });
     case "uint":
-      return instance.fc.toBuffer('uint64_t', data.data);
+      return instance.fc.toBuffer('uint64', data.data);
     case "int":
-      return instance.fc.toBuffer('int64_t', data.data);
+      return instance.fc.toBuffer('int64', data.data);
     case "float":
       const raw = data.data;
       const value = Math.floor(raw * 1e8);
