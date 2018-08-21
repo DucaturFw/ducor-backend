@@ -16,14 +16,27 @@ describe('api responses', () =>
 	let server: Server
 	beforeAll(done =>
 	{
-		server = app.listen(40789, () => reverseMapInit().then(x => (makeConfig(), x)).then(done))
-	})
+		server = app.listen(40789, () => reverseMapInit().then(() => done()))
+	}, 25000)
 	afterAll(done =>
 	{
 		CONFIG.config = oldCfg
 		CONFIG.generate = oldGen
 
 		server.close(done)
+	})
+	it('random contract regression', async () =>
+	{
+		CONFIG.config = await makeConfig()
+		CONFIG.generate = generate
+
+		let res = await axios(`${URL}/generate/eos/random/simple?updatefreq=100&lifetime=1000&config=%7B%7D`)
+		expect(res.status).toEqual(200)
+		let data = res.data
+		expect(data).toContainAllKeys(['contract', 'instructions'])
+		expect(data.contract).toBeString()
+		expect(data.contract).not.toEqual('...')
+		expect(data.contract.length).toBeGreaterThan(100)
 	})
 	it('should ping', async () =>
 	{
@@ -33,13 +46,6 @@ describe('api responses', () =>
 		expect(res.data.time).toBeDefined()
 		expect(res.data.time).toBeNumber()
 		expect(res.data.time).toBeWithin(Date.now() - 1000, Date.now() + 1000)
-	})
-	it('should return empty config by default', async () =>
-	{
-		let res = await axios(`${URL}/config`)
-		expect(res).toBeDefined()
-		expect(res.data).toBeObject()
-		expect(res.data).toEqual({})
 	})
 	it('should return fake config', async () =>
 	{

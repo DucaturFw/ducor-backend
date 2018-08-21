@@ -4,44 +4,26 @@ import Contract from "web3/eth/contract"
 import { Provider } from "web3/providers"
 import { IOracleData, IDataGeneric } from "../../IOracleData"
 import { ITxPushResult } from "../../IBlockchain"
+import { assertEnv as assertEnvWatcher, IEthereumWatcherOptions } from "./eth-watch";
 
-export interface IEthereumWatcherOptions {
-  web3provider: string
-  masterAddress: string
-
-  rethinkHost: string
-  rethinkPort: number
-  rethinkDB: string
-  rethinkTable: string
-
+export interface IEthereumPusherOptions extends IEthereumWatcherOptions {
   oraclePrivateKey : string,
   oraclePublicKey: string
 }
 
 function assertEnv() {
+  assertEnvWatcher()
   console.assert(
-    process.env.DUCOR_ETH_PROVIDER,
-    "DUCOR_ETH_PROVIDER is required"
+    process.env.DUCOR_ETH_ORACLE_PRIVATEKEY,
+    "DUCOR_ETH_ORACLE_PRIVATEKEY not found in .env!"
   )
   console.assert(
-    process.env.DUCOR_EOS_RETHINKHOST,
-    "DUCOR_EOS_RETHINKHOST not found in .env!"
-  )
-  console.assert(
-    process.env.DUCOR_EOS_RETHINKPORT,
-    "DUCOR_EOS_RETHINKPORT not found in .env!"
-  )
-  console.assert(
-    process.env.DUCOR_EOS_RETHINKDATABASE,
-    "DUCOR_EOS_RETHINKDATABASE not found in .env!"
-  )
-  console.assert(
-    process.env.DUCOR_EOS_RETHINKTABLE,
-    "DUCOR_EOS_RETHINKTABLE not found in .env!"
+    process.env.DUCOR_ETH_ORACLE_ACCOUNT,
+    "DUCOR_ETH_ORACLE_ACCOUNT not found in .env!"
   )
 }
 
-function getOptions(): IEthereumWatcherOptions {
+function getOptions(): IEthereumPusherOptions {
   assertEnv()
   return {
     web3provider: process.env.DUCOR_ETH_PROVIDER!,
@@ -50,7 +32,7 @@ function getOptions(): IEthereumWatcherOptions {
     rethinkHost: process.env.DUCOR_EOS_RETHINKHOST!,
     rethinkPort: parseInt(process.env.DUCOR_EOS_RETHINKPORT!),
     rethinkDB: process.env.DUCOR_EOS_RETHINKDATABASE!,
-    rethinkTable: process.env.DUCOR_EOS_RETHINKTABLE!,
+    rethinkTable: process.env.DUCOR_ETH_RETHINKTABLE!,
 
     oraclePrivateKey : process.env.DUCOR_ETH_ORACLE_PRIVATEKEY!,
     oraclePublicKey: process.env.DUCOR_ETH_ORACLE_ACCOUNT!

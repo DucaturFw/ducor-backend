@@ -1,13 +1,10 @@
 import { getDataDefByHash, init } from "./reverse_map"
 import { hash } from "./utils/hasher"
 
-beforeAll(async () => await init())
-
-describe("reverse_map migration", () =>
-{
-})
 describe("reverse_map data ids", () =>
 {
+	beforeAll(async () => await init())
+
 	it('should return LTC/BTC', async () =>
 	{
 		let h = hash("crypto/binance:pair=LTC/BTC")
@@ -22,10 +19,10 @@ describe("reverse_map data ids", () =>
 	})
 	it('should return random values', async () =>
 	{
-		let data = await getDataDefByHash(hash("random/number:"))
+		let data = await getDataDefByHash(hash("random/simple:"))
 		expect(data).toBeDefined()
 		expect(data.category).toEqual("random")
-		expect(data.provider).toEqual("number")
+		expect(data.provider).toEqual("simple")
 		expect(data.type).toEqual("uint")
 		expect(data.config).toEqual({})
 	})

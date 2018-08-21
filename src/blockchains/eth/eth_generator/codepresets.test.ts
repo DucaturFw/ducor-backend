@@ -12,7 +12,7 @@ contract MasterOracle is Ownable {
         emit DataRequest(name, receiver, memo);
     }
     function request_data_args(string name, address receiver, string memo, int[] params) public {
-        emit DataRequest(name, receiver, params, memo);
+        emit DataRequest(name, receiver, memo, params);
     }
 }
 
