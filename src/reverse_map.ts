@@ -3,10 +3,13 @@ import { hashDataId } from "./utils/hasher"
 import { IPairMatcher } from "./providers/crypto/IPairMatcher"
 import { exchanges } from "./providers"
 
-let dataDefinitions: { [key: string]: IDataDefinition } = {}
+let dataDefinitions: { [key: string]: IDataDefinition } = { }
 
 export async function init()
 {
+	if (Object.keys(dataDefinitions).length > 0)
+		return Promise.resolve()
+
 	let cryptoExch = async (matcher: IPairMatcher, name: string) => (await matcher.listPairsCanonical())
 		.map(x => x.join('/'))
 		.map(x => ({ category: "crypto", provider: name, config: { pair: x }, type: "price" as IDataType}))
