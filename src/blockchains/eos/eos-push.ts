@@ -1,6 +1,6 @@
-import { IOracleData, IDataGeneric } from "../../IOracleData"
-import Eos from "eosjs"
-import { ITxPushResult } from "../../IBlockchain";
+import { IOracleData, IDataGeneric, IDataType } from "../../IOracleData"
+import Eos, { IEosContract } from "eosjs"
+import { ITxPushResult } from "../../IBlockchain"
 
 let eosInstance: any
 
@@ -9,13 +9,14 @@ export interface IPayload {
   data_id: string
 }
 
-export interface IEosOptions {
+export interface IEosPushOptions {
   chainId: string
   endpoint: string
   keyprovider: string
+  master: string
 }
 
-function eos(config: Partial<IEosOptions>) {
+function eos(config: IEosPushOptions) {
   if (eosInstance == null) {
     eosInstance = Eos({
       chainId: config.chainId,
@@ -27,73 +28,75 @@ function eos(config: Partial<IEosOptions>) {
   return eosInstance
 }
 
-function getContract(contract: string) {
-  return eos({
-    chainId: process.env.DUCOR_EOS_CHAINID,
-    keyprovider: process.env.DUCOR_EOS_ORACLE_PRIVATEKEY,
-    endpoint: process.env.DUCOR_EOS_ENDPOINT
-  }).contract(contract)
+function getContract(config: IEosPushOptions) {
+  return eos(config).contract(config.master)
 }
 
-async function pushContract(instance: any, type: string, hash: string, data: any) : Promise<ITxPushResult<boolean>> {
-  const tx = await instance[`push${type}`](process.env.DUCOR_EOS_ORACLE_ACCOUNT, hash, data, {
-    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
+function assertEnv() {
+  console.assert(process.env.DUCOR_EOS_CHAINID, 'DUCOR_EOS_CHAINID not found in .env!')
+  console.assert(process.env.DUCOR_EOS_ORACLE_PRIVATEKEY, 'DUCOR_EOS_ORACLE_PRIVATEKEY not found in .env!')
+  console.assert(process.env.DUCOR_EOS_ENDPOINT, 'DUCOR_EOS_ENDPOINT not found in .env!')
+  console.assert(process.env.DUCOR_EOS_MASTER_ORACLE, 'DUCOR_EOS_MASTER_ORACLE not found in .env!')
+}
+
+function getOptions() : IEosPushOptions {
+  return (assertEnv(), {
+    chainId: process.env.DUCOR_EOS_CHAINID!,
+    keyprovider: process.env.DUCOR_EOS_ORACLE_PRIVATEKEY!,
+    endpoint: process.env.DUCOR_EOS_ENDPOINT!,
+    master: process.env.DUCOR_EOS_MASTER_ORACLE!
   })
-  return {
-    txhash: tx.transaction_id,
-    result: true    
+}
+
+function pack(instance : IEosContract, data : IOracleData) : Buffer {
+  console.log(data)
+  switch(data.type) {
+    case "bytes":
+      return instance.fc.toBuffer('bytes', data.data);
+    case "price":
+      return instance.fc.toBuffer('price', {
+        value: data.data.price, 
+        decimals: data.data.decimals
+      });
+    case "uint":
+      return instance.fc.toBuffer('uint64', data.data);
+    case "int":
+      return instance.fc.toBuffer('int64', data.data);
+    case "float":
+      const raw = data.data;
+      const value = Math.floor(raw * 1e8);
+      const decimals = 8;
+      return instance.fc.toBuffer('price', {
+        value,
+        decimals
+      });
   }
-}
 
-async function pushPrice(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"price", { price: number; decimals: number }>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "price", hash, {
-    value: data.data.price,
-    decimals: data.data.decimals
-  })
-}
-
-async function pushInt(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"int", number>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "int", hash, data.data)
-}
-async function pushUint(
-  contract: string,
-  hash: string,
-  data: IDataGeneric<"uint", number>
-) : Promise<ITxPushResult<boolean>> {
-  const instance = await getContract(contract)
-  return pushContract(instance, "uint", hash, data.data)
+  throw new Error("Unkown data type");
 }
 
 export default async function push(
   contract: string,
   hash: string,
-  data: IOracleData
+  data: IOracleData,
+  memo?: string
 ): Promise<ITxPushResult<boolean>> {
-  switch (data.type) {
-    case "price":
-      return pushPrice(contract, hash, data)
-    case "int":
-      return pushInt(contract, hash, data)
-    case "uint":
-      return pushUint(contract, hash, data)
-    default:
-      throw new Error("Not implemented data type: " + data.type)
-  }
-}
+  const options = getOptions();
+  const instance = await getContract(options);
+  // void push(account_name oracle, account_name contract, string task, string memo, bytes data)
+  const tx = await instance.push(
+    process.env.DUCOR_EOS_ORACLE_ACCOUNT,
+    contract,
+    hash,
+    memo || "",
+    pack(instance, data),
+    {
+      authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
+    }
+  )
 
-export async function sell(contract: string) {
-  let instance = await getContract(contract)
-  await instance.sell(process.env.DUCOR_EOS_ORACLE_ACCOUNT, 5, {
-    authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
-  })
+  return {
+    txhash: tx.transaction_id,
+    result: true
+  }
 }

@@ -1,4 +1,4 @@
-import push, { sell } from "./eos-push"
+import push from "./eos-push"
 import * as hasher from "../../utils/hasher"
 export interface IFieldConfguration {
   type: string
@@ -109,7 +109,7 @@ async function exec() {
     }
   )
   console.log("----------------------------- sell")
-  await sell("priceoracliz")
+  // await sell("priceoracliz")
 }
 
 exec()
