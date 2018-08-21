@@ -1,6 +1,6 @@
 import ccxt from "ccxt"
 import { request as fake } from "./fake"
-import { getArray as randomArray, getInteger as randomInt } from "./random/random"
+import { getArray as randomArray, getInteger as randomInt, getType as randomType } from "./random/random"
 import { generateProvider, IExchangeProvider } from "./crypto/ccxt-universal"
 import { mapObject } from "../utils/map_object"
 
@@ -34,4 +34,9 @@ export let providers = {
 	},
 }
 
-export let types = mapObject(exchangesMap, x => x.getType)
+export let types = {
+	crypto: mapObject(exchangesMap, x => x.getType),
+	random: {
+		simple: randomType
+	}
+}

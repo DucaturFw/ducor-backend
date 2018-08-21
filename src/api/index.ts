@@ -17,9 +17,6 @@ export let CONFIG = {
 	})
 }
 
-export type IConfigGenerateFunction = typeof CONFIG.generate
-export type IConfigFunction = typeof CONFIG.config
-
 // CORS
 app.use((req, res, next) =>
 {
@@ -35,12 +32,25 @@ app.get('/generate/:blockchain/:category/:provider', (req, res, next) =>
 	let { blockchain, category, provider } = req.params
 	let { config, updatefreq, lifetime } = req.query
 	
-	return res.json(CONFIG.generate({
-		blockchain,
-		category,
-		provider,
-		config: JSON.parse(config),
-		updatefreq,
-		lifetime,
-	}))
+	let resp
+	try
+	{
+		resp = CONFIG.generate({
+			blockchain,
+			category,
+			provider,
+			config: JSON.parse(config),
+			updatefreq,
+			lifetime,
+		})
+	}
+	catch(e)
+	{
+		let msg = ("message" in e) ? e.message : e
+		return res.json({ error: msg })
+	}
+	return res.json(resp)
 })
+
+export type IConfigGenerateFunction = typeof CONFIG.generate
+export type IConfigFunction = typeof CONFIG.config

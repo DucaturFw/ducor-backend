@@ -3,10 +3,13 @@ import { hashDataId } from "./utils/hasher"
 import { IPairMatcher } from "./providers/crypto/IPairMatcher"
 import { exchanges } from "./providers"
 
-let dataDefinitions: { [key: string]: IDataDefinition } = {}
+let dataDefinitions: { [key: string]: IDataDefinition } = { }
 
 export async function init()
 {
+	if (Object.keys(dataDefinitions).length > 0)
+		return Promise.resolve()
+
 	let cryptoExch = async (matcher: IPairMatcher, name: string) => (await matcher.listPairsCanonical())
 		.map(x => x.join('/'))
 		.map(x => ({ category: "crypto", provider: name, config: { pair: x }, type: "price" as IDataType}))
@@ -23,12 +26,12 @@ export async function init()
 	let matches = await Promise.all(exchanges.map(x => addHashes(x.matcher, x.exchange.id)))
 	Object.assign(dataDefinitions, ...matches)
 	
-	let obj: IDataHashSource = { category: "random", provider: "number", config: {} }
+	let obj: IDataHashSource = { category: "random", provider: "simple", config: { } }
 	let hash = hashDataId(obj)
 	dataDefinitions[hash] = { ...obj, type: "uint", hash }
 }
 
-export let getDataDefByHash = async (hash: string): Promise<IDataDefinition> =>
+export let getDataDefByHash = (hash: string): IDataDefinition =>
 {
 	return dataDefinitions[hash]
 }
