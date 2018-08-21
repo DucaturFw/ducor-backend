@@ -17,13 +17,13 @@ let readers = [
 	eosRead, 
 	ethRead,
 	qtumRead,
-	fakeRead
+	// fakeRead
 ]
 let writers = {
 	eos: eosPush,
 	eth: ethPush,
 	qtum: qtumPush,
-	fake: fakePush,
+	// fake: fakePush,
 }
 
 export let onRequest: RequestHandler = async req => {
