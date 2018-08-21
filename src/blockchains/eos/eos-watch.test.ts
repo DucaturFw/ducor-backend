@@ -2,15 +2,11 @@ require("dotenv").config()
 
 import "jest-extended"
 import {
-  parsers,
   IContext,
   parseRequestArguments,
-  prepareContext,
-  IEosWatchOptions,
   getOptions,
   getEos
 } from "./eos-watch"
-import Eos from "eosjs";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
