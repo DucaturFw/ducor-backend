@@ -32,22 +32,24 @@ app.get('/generate/:blockchain/:category/:provider', (req, res, next) =>
 	let { blockchain, category, provider } = req.params
 	let { config, updatefreq, lifetime } = req.query
 	
+	let resp
 	try
 	{
-		return res.json(CONFIG.generate({
+		resp = CONFIG.generate({
 			blockchain,
 			category,
 			provider,
 			config: JSON.parse(config),
 			updatefreq,
 			lifetime,
-		}))
+		})
 	}
 	catch(e)
 	{
 		let msg = ("message" in e) ? e.message : e
 		return res.json({ error: msg })
 	}
+	return res.json(resp)
 })
 
 export type IConfigGenerateFunction = typeof CONFIG.generate
