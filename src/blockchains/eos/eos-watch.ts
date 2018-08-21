@@ -27,8 +27,9 @@ export interface ITask {
 export interface IEosWatchOptions {
   delay: number
   eos: {
+    [key: string]: any
     chainId: string
-    httpEndpoint: string
+    httpEndpoint: string | null
   }
   masterAccount: string
   rethinkHost: string
@@ -64,7 +65,7 @@ function assertEnvs() {
   assertEnv("DUCOR_EOS_RETHINKTABLE")
 }
 
-const getOptions = (): IEosWatchOptions => (
+export const getOptions = (): IEosWatchOptions => (
   assertEnvs(),
   {
     delay: parseInt(process.env.DUCOR_EOS_WATCH_DELAY!),
@@ -80,11 +81,11 @@ const getOptions = (): IEosWatchOptions => (
   }
 )
 
-const getEos = (ctx: Partial<IContext>) => () => {
+export const getEos = (ctx: Partial<IContext>) => () => {
   return Eos(ctx.options!.eos)
 }
 
-const getContract = (ctx: Partial<IContext>, eos: EosInstance) => (
+export const getContract = (ctx: Partial<IContext>, eos: EosInstance) => (
   account: string
 ) => {
   return eos.contract(account)
@@ -103,7 +104,7 @@ const getTable = (ctx: Partial<IContext>, eos: EosInstance) => (
   })
 }
 
-const getTasks = (ctx: Partial<IContext>) => async (
+export const getTasks = (ctx: Partial<IContext>) => async (
   master: string
 ): Promise<ITask[]> => {
   const eos = getEos(ctx)()
@@ -114,14 +115,14 @@ const getTasks = (ctx: Partial<IContext>) => async (
   }))
 }
 
-const getConnection = (ctx: Partial<IContext>) => (): Promise<r.Connection> => {
+export const getConnection = (ctx: Partial<IContext>) => (): Promise<r.Connection> => {
   return r.connect({
     host: ctx.options!.rethinkHost,
     port: ctx.options!.rethinkPort
   })
 }
 
-const getOrCreateDatabase = (ctx: Partial<IContext>) => async (
+export const getOrCreateDatabase = (ctx: Partial<IContext>) => async (
   database: string
 ): Promise<r.Db> => {
   const databases = await r.dbList().run(ctx.conn!)
@@ -132,7 +133,7 @@ const getOrCreateDatabase = (ctx: Partial<IContext>) => async (
   return r.db(database)
 }
 
-const checkOrCreateTable = (ctx: Partial<IContext>) => async (
+export const checkOrCreateTable = (ctx: Partial<IContext>) => async (
   table: string,
   opts?: r.TableOptions
 ): Promise<void> => {

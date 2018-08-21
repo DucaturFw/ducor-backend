@@ -5,13 +5,25 @@ import {
   parsers,
   IContext,
   parseRequestArguments,
-  prepareContext
+  prepareContext,
+  IEosWatchOptions,
+  getOptions,
+  getEos
 } from "./eos-watch"
+import Eos from "eosjs";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
 describe("eos watcher", () => {
   let context: IContext
   beforeAll(async () => {
-    context = await prepareContext()
+    context = <IContext>{}
+    context.options = getOptions();
+    context.options.eos.httpEndpoint = null
+    context.eos = getEos(context)();
+
+    const abi = readFileSync(resolve(__dirname, `./masteroracle.abi`), 'utf8')
+    context.eos.fc.abiCache.abi(context.options.masterAccount, JSON.parse(abi))
   })
   describe("deserialize args", () => {
     it("should deserialize random", async () => {
@@ -19,7 +31,7 @@ describe("eos watcher", () => {
       const args = await parseRequestArguments(context)(randomArgs)
 
       expect(args).toHaveLength(2)
-      expect(args).toEqual([ 100, 2000 ])
+      expect(args).toEqual([100, 2000])
     })
     it("should deserialize big structure", async () => {
       const rawArgs =
@@ -27,7 +39,15 @@ describe("eos watcher", () => {
       const args = await parseRequestArguments(context)(rawArgs)
 
       expect(args).toHaveLength(7)
-      expect(args).toEqual([ -10, 20, '-10', '20', '050208', 'Hello World', -500 ])
+      expect(args).toEqual([
+        -10,
+        20,
+        "-10",
+        "20",
+        "050208",
+        "Hello World",
+        -500
+      ])
     })
   })
 })
