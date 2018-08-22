@@ -61,9 +61,9 @@ export async function makeConfig(bypassCache = false): Promise<IConfigFunction>
 	let providers = await Promise.all(exchanges.map(async x => ({
 		id: x.exchange.id,
 		name: x.exchange.name,
-		types: (await x.matcher.listPairsCanonical()).map(x => x.join('/'))
+		types: (await x.matcher.listPairsCanonical().catch(e => [] as [string, string][])).map(x => x.join('/'))
 	})))
-	
+
 	let flatten = <T>(arr: T[][]) => arr.reduce((acc, val) => acc.concat(val), [])
 
 	let unique = (arr: string[]) => Object.keys(arr.reduce((acc, cur) => acc[cur] = acc, {} as {[key: string]: any}))

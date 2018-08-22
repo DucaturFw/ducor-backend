@@ -10,7 +10,7 @@ export async function init()
 	if (Object.keys(dataDefinitions).length > 0)
 		return Promise.resolve()
 
-	let cryptoExch = async (matcher: IPairMatcher, name: string) => (await matcher.listPairsCanonical())
+	let cryptoExch = async (matcher: IPairMatcher, name: string) => (await matcher.listPairsCanonical().catch(e => [] as [string, string][]))
 		.map(x => x.join('/'))
 		.map(x => ({ category: "crypto", provider: name, config: { pair: x }, type: "price" as IDataType}))
 		.map(x => ({ ...x, hash: hashDataId(x) }))
@@ -18,7 +18,7 @@ export async function init()
 	
 	let addHashes = async (matcher: IPairMatcher, name: string) =>
 	{
-		let hashes = await cryptoExch(matcher, name)
+		let hashes = await cryptoExch(matcher, name).catch(e => ({} as { [key: string]: IDataDefinition }))
 		console.log(`added ${Object.keys(hashes).length} hashes from ${name}`)
 		return hashes
 	}
