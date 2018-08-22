@@ -21,29 +21,31 @@ export let generators = {
 
 export let generate: IConfigGenerateFunction = ({ blockchain, category, config, lifetime, provider, updatefreq }) =>
 {
+	let stamp = `${blockchain}|${category}|${JSON.stringify(config)}|${provider}|${updatefreq}`
+
 	let cat = types[category as keyof typeof types]
 	if (!cat)
 		return {
 			contract: "ERROR",
-			instructions: `ERROR! category "${category}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
+			instructions: `ERROR! category "${category}" not found!\n${stamp}`
 		}
 	let getType = cat[provider as keyof typeof cat] as ITypeProvider<any>
 	if (!getType)
 		return {
 			contract: "ERROR",
-			instructions: `ERROR! provider "${provider}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
+			instructions: `ERROR! provider "${provider}" not found!\n${stamp}`
 		}
 	let type = getType(config)
 	let hash = hashDataId({ category, provider, config })
 	if (!getDataDefByHash(hash))
 		return {
 			contract: "ERROR",
-			instructions: `ERROR! hash "${hash}" not found!\n${blockchain}|${category}|${config}|${provider}|${updatefreq}`
+			instructions: `ERROR! hash "${hash}" not found!\n${stamp}`
 		}
 	let e: IContractEndpointSettings = { ...type, lifetime: parseInt(lifetime), updateFreq: parseInt(updatefreq), hash }
 	let generator = generators[blockchain as keyof typeof generators]
 	if (!generator)
-		return { contract: "ERROR", instructions: `ERROR! generator not found for ${blockchain}\n${blockchain}|${category}|${config}|${provider}|${updatefreq}` }
+		return { contract: "ERROR", instructions: `ERROR! generator not found for ${blockchain}\n${stamp}` }
 
 	return {
 		contract: generator([e]),
