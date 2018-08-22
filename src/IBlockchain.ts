@@ -1,4 +1,5 @@
 import { IOracleData } from "./IOracleData"
+import { IDataProviderRequestArg } from "./IDataProvider"
 
 export interface IDataRequest
 {
@@ -11,7 +12,7 @@ export interface IDataRequest
 	memo?: string
 }
 
-export type RequestHandler = (req: IDataRequest) => Promise<boolean>
+export type RequestHandler = (req: IDataRequest, convertArgs: (args: any[], signature: IDataProviderRequestArg[]) => any[]) => Promise<boolean>
 
 export type IBlockchainReader = (listener: RequestHandler) => Promise<{ stop: () => Promise<void> }>
 export type IBlockchainPusher<TTxResult> = (receiver: string, dataHash: string, data: IOracleData, memo?: string) => Promise<ITxPushResult<TTxResult>>

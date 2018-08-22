@@ -6,10 +6,10 @@ import { start as ethRead, push as ethPush } from "./blockchains/eth"
 import { start as qtumRead, push as qtumPush } from "./blockchains/qtum"
 import { RequestHandler } from "./IBlockchain"
 import { getDataDefByHash, init as initReverseMap } from "./reverse_map"
-import { providers } from "./providers"
+import { providers, types } from "./providers"
 import { app as api, CONFIG as apiConfig } from "./api"
 import { generate, makeConfig } from "./api/configurator"
-import { IDataProvider } from "./IDataProvider"
+import { IDataProvider, ITypeProvider } from "./IDataProvider"
 
 console.log("hello")
 
@@ -26,7 +26,7 @@ let writers = {
 	// fake: fakePush,
 }
 
-export let onRequest: RequestHandler = async req => {
+export let onRequest: RequestHandler = async (req, parseArgs) => {
 	console.log("NEW REQUEST")
 	console.log(req)
 	let def = await getDataDefByHash(req.dataHash)
@@ -35,7 +35,11 @@ export let onRequest: RequestHandler = async req => {
 
 	let category = providers[def.category as keyof typeof providers]
 	let provider = category[def.provider as keyof typeof category] as IDataProvider<any, any[]>
-	let response = await provider(def.config, ...req.args || [])
+	let typeCategory = types[def.category as keyof typeof types]
+	let typeProvider = typeCategory[def.provider as keyof typeof typeCategory] as ITypeProvider<any>
+	let type = typeProvider(def.config)
+	let args = req.args ? parseArgs(req.args, type.args) : []
+	let response = await provider(def.config, args)
 	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response, req.memo)
 	return tx.result
 }

@@ -1,5 +1,6 @@
 import { IBlockchainReader, IBlockchainPusher } from "../IBlockchain"
-import { IContractGenerator } from "../IOracleData";
+import { IContractGenerator, IDataType } from "../IOracleData"
+import { IDataProviderRequestArg } from "../IDataProvider"
 
 export let start: IBlockchainReader = async listener =>
 {
@@ -10,12 +11,36 @@ export let start: IBlockchainReader = async listener =>
 		receiver: "fake_address",
 		requestId: `${i++}`,
 		timestamp: Date.now()
-	}), 10000)
+	}, parseArgs), 10000)
 
 	return {
 		stop: async () => clearInterval(timer)
 	}
 }
+let parseArgs = (args: any[], signature: IDataProviderRequestArg[]) =>
+{
+	if (args.length != signature.length)
+		throw `incorrect call: expected ${signature.length} args, but got ${args.length}`
+	
+	return args
+		.map((val, i) => [val, signature[i]] as [any, IDataProviderRequestArg])
+		.map(([arg, sig]) => parseArg(arg, sig.type))
+}
+let parseArg = (arg: any, type: IDataType) =>
+{
+	switch(type)
+	{
+		case "int":
+		case "uint":
+		case "float":
+		case "price":
+			return parseInt(arg)
+		case "bytes":
+		case "string":
+			return arg
+	}
+}
+
 export let push: IBlockchainPusher<boolean> = async (receiver, dataHash, data) =>
 {
 	console.log(`[FAKE] PUSHED DATA TO ${receiver}`)
