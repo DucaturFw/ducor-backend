@@ -28,12 +28,24 @@ export let onRequest: RequestHandler = async (req, parseArgs) => {
 	console.log(req)
 	let def = await getDataDefByHash(req.dataHash)
 	if (!def)
-		return console.log(`data hash not found! ${req.dataHash}`), false
+		return console.log(`data hash not found! ${JSON.stringify(req)}`), false
 
 	let category = providers[def.category as keyof typeof providers]
+	if (!category)
+		return console.log(`category not found! ${category}\n${JSON.stringify(def)}`), false
+	
 	let provider = category[def.provider as keyof typeof category] as IDataProvider<any, any[]>
+	if (!provider)
+		return console.log(`provider not found! ${provider}\n${JSON.stringify(def)}`), false
+	
 	let typeCategory = types[def.category as keyof typeof types]
+	if (!typeCategory)
+		return console.log(`typeCategory not found! ${typeCategory}\n${JSON.stringify(def)}`), false
+	
 	let typeProvider = typeCategory[def.provider as keyof typeof typeCategory] as ITypeProvider<any>
+	if (!typeProvider)
+		return console.log(`typeProvider not found! ${typeProvider}\n${JSON.stringify(def)}`), false
+	
 	let type = typeProvider(def.config)
 	let args = req.args ? parseArgs(req.args, type.args) : []
 	let response = await provider(def.config, args)
