@@ -14,7 +14,7 @@ let getArray: IDataProvider<{}, [number, number, number]> = (config, min, max, c
 }
 export let getData: IDataProvider<{ multi: boolean }, [number, number, number?]> = (config, min, max, count) =>
 {
-	if (config.multi)
+	if (!config.multi)
 		return getInteger(config, min, max)
 	
 	return getArray(config, min, max, count!)
