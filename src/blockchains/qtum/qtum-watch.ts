@@ -31,7 +31,7 @@ export const start: IBlockchainReader = async listener => {
         id: event.transactionHash,
         task: event.event!.name,
         contract: event.event!.receiver,
-        args: parseArgs(event.event!.params),
+        args: event.event!.params,
         memo: event.event!.memo,
         timestamp: new Date().getTime()
       }
@@ -51,7 +51,7 @@ export const start: IBlockchainReader = async listener => {
         receiver: model.contract,
         blockchain: "qtum",
         timestamp: model.timestamp
-      })
+      }, parseArgs)
     })
 
   return {
