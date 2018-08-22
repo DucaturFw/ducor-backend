@@ -15,12 +15,12 @@ console.log("hello")
 let readers = [
 	eosRead, 
 	ethRead,
-	qtumRead
+	// qtumRead
 ]
 let writers = {
 	eos: eosPush,
 	eth: ethPush,
-	qtum: qtumPush,
+	// qtum: qtumPush,
 }
 
 export let onRequest: RequestHandler = async (req, parseArgs) => {
