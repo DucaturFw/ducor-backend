@@ -1,6 +1,7 @@
 import { IOracleData, IDataGeneric, IDataType } from "../../IOracleData"
 import Eos, { IEosContract } from "eosjs"
 import { ITxPushResult } from "../../IBlockchain"
+import { error } from "./utils/logger";
 
 let eosInstance: any
 
@@ -81,22 +82,30 @@ export default async function push(
   data: IOracleData,
   memo?: string
 ): Promise<ITxPushResult<boolean>> {
-  const options = getOptions();
-  const instance = await getContract(options);
-  // void push(account_name oracle, account_name contract, string task, string memo, bytes data)
-  const tx = await instance.push(
-    process.env.DUCOR_EOS_ORACLE_ACCOUNT,
-    contract,
-    hash,
-    memo || "",
-    pack(instance, data),
-    {
-      authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
-    }
-  )
+  try {
+    const options = getOptions();
+    const instance = await getContract(options);
+    const tx = await instance.push(
+      process.env.DUCOR_EOS_ORACLE_ACCOUNT,
+      contract,
+      hash,
+      memo || "",
+      pack(instance, data),
+      {
+        authorization: [process.env.DUCOR_EOS_ORACLE_ACCOUNT]
+      }
+    )
 
-  return {
-    txhash: tx.transaction_id,
-    result: true
+    return {
+      txhash: tx.transaction_id,
+      result: true
+    }
+    
+  } catch(e) {
+    error("Push error", e)
+    return {
+      txhash: '0',
+      result: false
+    }
   }
 }
