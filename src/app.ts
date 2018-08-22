@@ -50,7 +50,7 @@ export let onRequest: RequestHandler = async (req, parseArgs) => {
 	
 	let type = typeProvider(def.config)
 	let args = req.args ? parseArgs(req.args, type.args) : []
-	let response = await provider(def.config, args)
+	let response = await provider(def.config, ...args)
 	let tx = await writers[req.blockchain as keyof typeof writers](req.receiver, req.dataHash, response, req.memo)
 	return tx.result
 }
