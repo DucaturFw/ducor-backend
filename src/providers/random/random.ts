@@ -3,7 +3,7 @@ import { IOracleData } from "../../IOracleData"
 
 let random = (limit: number) => Math.floor(Math.random() * limit)
 let randomBetween = (min: number, max: number) => min + random(max - min)
-let getInteger: IDataProvider<{}, [number, number]> = (config, min, max) => Promise.resolve({ type: "int", data: randomBetween(min, max) } as IOracleData)
+let getInteger: IDataProvider<{}, [number, number]> = (config, min, max) => Promise.resolve({ type: "int", data: randomBetween(min, max + 1) } as IOracleData)
 let getArray: IDataProvider<{}, [number, number, number]> = (config, min, max, count) =>
 {
 	let numbers = []
@@ -12,9 +12,12 @@ let getArray: IDataProvider<{}, [number, number, number]> = (config, min, max, c
 	
 	return Promise.resolve({ type: "bytes", data: Buffer.from(numbers) } as IOracleData)
 }
+
+export let _test_ = { random, randomBetween, getInteger, getArray }
+
 export let getData: IDataProvider<{ multi: boolean }, [number, number, number?]> = (config, min, max, count) =>
 {
-	if (config.multi)
+	if (!config.multi)
 		return getInteger(config, min, max)
 	
 	return getArray(config, min, max, count!)
