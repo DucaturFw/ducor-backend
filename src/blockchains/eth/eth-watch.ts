@@ -2,7 +2,7 @@ import Web3 from "web3"
 import { IBlockchainReader } from "../../IBlockchain"
 import master from "./MasterOracle.json"
 import r from "rethinkdb"
-import {IDataProvider, IDataProviderRequestArg} from "../../IDataProvider";
+import { IDataProviderRequestArg } from "../../IDataProvider";
 
 export interface IEthereumWatcherOptions {
   web3provider: string
@@ -102,10 +102,12 @@ export function parseArgs(args: number[], signature: IDataProviderRequestArg[]) 
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
   const web3 = new Web3()
+  console.log('[ETH] Using provider:', options.web3provider, '; master address:', options.masterAddress)
   const eventProvider = new Web3.providers.WebsocketProvider(
     options.web3provider
   )
   web3.setProvider(eventProvider)
+  await web3.eth.net.isListening()
 
   const masterContract = new web3.eth.Contract(
     master.abi,
@@ -114,14 +116,20 @@ export const start: IBlockchainReader = async listener => {
 
   masterContract.events
     .allEvents({
-      fromBlock: 0
+      fromBlock: 2858489
     })
     .on("data", async event => {
-      const conn = await getConnection(options.rethinkHost, options.rethinkPort)
-      const db = await getOrCreateDatabase(options.rethinkDB, conn)
-      await checkOrCreateTable(options.rethinkTable, db, conn, {
-        primary_key: "id"
-      })
+      let conn: r.Connection | undefined = undefined
+      let db: r.Db | undefined = undefined
+      try {
+        conn = await getConnection(options.rethinkHost, options.rethinkPort)
+        db = await getOrCreateDatabase(options.rethinkDB, conn)
+        await checkOrCreateTable(options.rethinkTable, db, conn, {
+          primary_key: "id"
+        })
+      } catch (err) {
+        console.error(err);
+      }
 
       const model = {
         id: event.transactionHash,
@@ -132,14 +140,18 @@ export const start: IBlockchainReader = async listener => {
         timestamp: new Date().getTime()
       }
 
-      await db
-        .table(options.rethinkTable)
-        .insert([model], {
-          conflict: "replace"
-        })
-        .run(conn)
+      if (db && conn) {
+        await db
+            .table(options.rethinkTable)
+            .insert([model], {
+                conflict: "replace"
+            })
+            .run(conn)
 
-      await conn.close()
+        await conn!.close()
+      } else {
+        console.debug('RethinkDB is not connected!')
+      }
 
       listener({
         dataHash: model.task,
