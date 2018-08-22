@@ -242,15 +242,17 @@ export const taskToRequestMap = (ctx: IContext, listener: RequestHandler) => asy
 ) => {
   log("push request", t)
 
+  const args = await parseRequestArguments(ctx)(t.args)
+
   listener({
     dataHash: t.task,
     requestId: t.id,
     receiver: t.contract,
     blockchain: "eos",
     timestamp: t.timestamp,
-    args: await parseRequestArguments(ctx)(t.args),
+    args: args,
     memo: t.memo
-  })
+  }, (a, s) => a)
 }
 
 export async function prepareContext(): Promise<IContext> {
@@ -294,7 +296,7 @@ export const start: IBlockchainReader = async listener => {
     } catch (e) {
       error("Unexpected error in requesting tasks")
       error(e)
-      throw e
+      return
     }
 
     try {
@@ -309,7 +311,7 @@ export const start: IBlockchainReader = async listener => {
     } catch (e) {
       error("Unexpected error in storing tasks")
       error(e)
-      throw e
+      return
     }
 
     info("Watch eos at ", context.now)
@@ -323,7 +325,7 @@ export const start: IBlockchainReader = async listener => {
     } catch (e) {
       error("Unexpected error in sending tasks to providers")
       error(e)
-      throw e
+      return
     }
   }, delay)
 

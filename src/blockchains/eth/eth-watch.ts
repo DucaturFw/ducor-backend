@@ -2,6 +2,7 @@ import Web3 from "web3"
 import { IBlockchainReader } from "../../IBlockchain"
 import master from "./MasterOracle.json"
 import r from "rethinkdb"
+import {IDataProvider, IDataProviderRequestArg} from "../../IDataProvider";
 
 export interface IEthereumWatcherOptions {
   web3provider: string
@@ -80,7 +81,23 @@ export async function checkOrCreateTable(
   }
 }
 
-export function parseArgs(params: number[]) { return params || [] }
+export function parseArgs(args: number[], signature: IDataProviderRequestArg[]) {
+  let lastIdx = 0;
+  return signature.map((el) => {
+      switch (el.type) {
+          case "int":
+          case "uint":
+            return args[lastIdx++];
+          case "float":
+          case "price":
+            return args[lastIdx++] / Math.pow(10, args[lastIdx++]);
+          case "bytes":
+          case "string":
+            return ''+args[lastIdx++];
+          default: throw new Error('Unknown type specified')
+      }
+  }) || []
+}
 
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
@@ -110,7 +127,7 @@ export const start: IBlockchainReader = async listener => {
         id: event.transactionHash,
         task: event.returnValues.name,
         contract: event.returnValues.receiver,
-        args: parseArgs(event.returnValues.params),
+        args: event.returnValues.params,
         memo: event.returnValues.memo,
         timestamp: new Date().getTime()
       }
@@ -132,7 +149,7 @@ export const start: IBlockchainReader = async listener => {
         args: model.args,
         memo: model.memo,
         timestamp: model.timestamp,
-      })
+      }, parseArgs)
     })
 
   return {
