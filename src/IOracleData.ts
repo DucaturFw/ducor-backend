@@ -1,3 +1,5 @@
+import { IDataProviderRequestArg } from "./IDataProvider"
+
 export type IDataType = "bytes" | "int" | "float" | "string" | "price" | "uint"
 export interface IDataGeneric<TType extends IDataType, TData> {
   type: TType
@@ -27,6 +29,7 @@ export interface IContractEndpoint {
   hash: string
   type: IDataType
   name: string
+  args: IDataProviderRequestArg[]
 }
 
 export interface IContractEndpointSettings extends IContractEndpoint {

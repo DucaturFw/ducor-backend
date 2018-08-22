@@ -28,7 +28,7 @@ export function generateProvider(exchange: ccxt.Exchange)
 		}
 	})
 
-	let getType: ITypeProvider<{ pair: string }> = config => ({ type: 'price', name: config.pair })
+	let getType: ITypeProvider<{ pair: string }> = config => ({ type: 'price', name: config.pair, args: [] })
 
 	let request: IDataProvider<{ pair: string }, []> = async config =>
 	{

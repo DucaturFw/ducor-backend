@@ -1,6 +1,6 @@
 import { IDataProvider, ITypeProvider } from "../IDataProvider"
 
-export let getType: ITypeProvider<{}> = config => ({ type: "int", name: "fake_type_name" })
+export let getType: ITypeProvider<{}> = config => ({ type: "int", name: "fake_type_name", args: [] })
 
 export let request: IDataProvider<{}, []> = async req =>
 {
