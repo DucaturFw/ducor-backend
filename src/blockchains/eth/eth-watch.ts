@@ -177,7 +177,9 @@ export const start: IBlockchainReader = async listener => {
         contract: event.returnValues.receiver,
         args: event.returnValues.params || [],
         memo: event.returnValues.memo,
-        timestamp: new Date().getTime()
+        timestamp: new Date().getTime(),
+        blockNumber: event.blockNumber,
+        logIndex: event.logIndex,
       }
 
       if (db && conn) {
