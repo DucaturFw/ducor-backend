@@ -123,22 +123,24 @@ export const start: IBlockchainReader = async listener => {
     options.masterAddress
   )
 
-  console.log('[ETH] Getting or creating RethinkDB table.')
-  const conn = await getConnection(options.rethinkHost, options.rethinkPort)
-  const db = await getOrCreateDatabase(options.rethinkDB, conn)
-  if (db && conn) {
-      await checkOrCreateTable(options.rethinkTable, db, conn, {
-          primary_key: "id"
-      })
-  } else {
-        console.error('[ETH] Failed to connect to RethinkDB table.');
+  let fromBlock = 0
+  let db: r.Db | undefined
+  let conn: r.Connection | undefined
+  try {
+    console.log('[ETH] Getting or creating RethinkDB table.')
+    const conn = await getConnection(options.rethinkHost, options.rethinkPort)
+    const db = await getOrCreateDatabase(options.rethinkDB, conn)
+    await checkOrCreateTable(options.rethinkTable, db, conn, {
+        primary_key: "id"
+    })
+    fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+  } catch (err) {
+        console.error('[ETH] Failed to connect to RethinkDB.');
   }
 
   console.log('[ETH] Starting watcher.')
   masterContract.events
-    .allEvents({
-      fromBlock: await getLastBlock(db, conn, options.rethinkTable)
-    })
+    .allEvents({ fromBlock })
     .on("data", async event => {
       const model = {
         id: event.transactionHash,
@@ -173,6 +175,7 @@ export const start: IBlockchainReader = async listener => {
         memo: model.memo,
         timestamp: model.timestamp,
       }, parseArgs)
+        .catch(err => console.error('Error while sending to listener:', err))
     })
 
   return {

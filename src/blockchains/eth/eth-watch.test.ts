@@ -12,7 +12,7 @@ describe('RethinkDB manipulations', () => {
         rethinkTable: process.env.DUCOR_ETH_RETHINKTABLE!
     }
 
-    it('should create similar contract', async () => {
+    it('should create connection to rethinkdb', async () => {
         try {
             conn = await getConnection(options.rethinkHost, options.rethinkPort)
             db = await getOrCreateDatabase(options.rethinkDB, conn)
