@@ -119,9 +119,17 @@ async function connectToRethink(opts: IEthereumWatcherOptions): Promise<[r.Db, r
     })
     console.log(`[ETH] Creating 'chronological' index on table '${opts.rethinkTable}'`)
     const indexes = await db.table(opts.rethinkTable).indexList().run(conn)
-    if (indexes.indexOf('chronological') === -1)
-    await db.table(opts.rethinkTable).indexCreate('chronological', [r.row('blockNumber'), r.row('logIndex')]).run(conn)
-    await db.table(opts.rethinkTable).indexWait('chronological').run(conn)
+    if (indexes.indexOf('chronological') === -1) {
+        await db.table(opts.rethinkTable)
+            .indexCreate('chronological', [
+                r.row('blockNumber'),
+                r.row('logIndex')
+            ])
+            .run(conn)
+        await db.table(opts.rethinkTable)
+            .indexWait('chronological')
+            .run(conn)
+    }
     console.log(`[ETH] Getting last block from RethinkDB`)
     return [db, conn]
   }
