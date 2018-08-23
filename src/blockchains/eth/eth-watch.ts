@@ -105,6 +105,33 @@ export const getLastBlock = (db: r.Db, conn: r.Connection, table: string): Promi
     .default(0)
     .run(conn)
 
+async function connectToRethink(opts: typeof options): Promise<[r.Db, r.Connection]>
+{
+  try
+  {
+    console.log(`[ETH] Connectin to RethinkDB on ${opts.rethinkHost}:${opts.rethinkPort}`)
+    const conn = await getConnection(opts.rethinkHost, opts.rethinkPort)
+    console.log(`[ETH] Getting or creating RethinkDB database '${opts.rethinkDB}'`)
+    const db = await getOrCreateDatabase(opts.rethinkDB, conn)
+    console.log(`[ETH] Getting or creating RethinkDB table '${opts.rethinkTable}'`)
+    await checkOrCreateTable(opts.rethinkTable, db, conn, {
+      primary_key: "id"
+    })
+    console.log(`[ETH] Creating 'chronological' index on table '${opts.rethinkTable}'`)
+    const indexes = await db.indexList().run(conn)
+    if (indexes.indexOf('chronological') === -1)
+    await db.table(opts.rethinkTable).indexCreate('chronological', [r.row('blockNumber'), r.row('logIndex')]).run(conn)
+    await db.table(opts.rethinkTable).indexWait('chronological').run(conn)
+    console.log(`[ETH] Getting last block from RethinkDB`)
+    return [db, conn]
+  }
+  catch (err)
+  {
+    console.error('[ETH] Failed to connect to RethinkDB:', err)
+  }
+  return [undefined as any, undefined as any]
+}
+
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
   const web3 = new Web3()
@@ -122,47 +149,9 @@ export const start: IBlockchainReader = async listener => {
     options.masterAddress
   )
 
-  async function connectToRethink(opts: typeof options): Promise<[r.Db, r.Connection]>
-  {
-    try
-    {
-      console.log(`[ETH] Connectin to RethinkDB on ${options.rethinkHost}:${options.rethinkPort}`)
-      const conn = await getConnection(options.rethinkHost, options.rethinkPort)
-      console.log(`[ETH] Getting or creating RethinkDB database '${options.rethinkDB}'`)
-      const db = await getOrCreateDatabase(options.rethinkDB, conn)
-      console.log(`[ETH] Getting or creating RethinkDB table '${options.rethinkTable}'`)
-      await checkOrCreateTable(options.rethinkTable, db, conn, {
-        primary_key: "id"
-      })
-      console.log(`[ETH] Creating 'chronological' index on table '${options.rethinkTable}'`)
-      try
-      {
-        await db
-          .table(options.rethinkTable)
-          .indexCreate('chronological', [
-            r.row('blockNumber'),
-            r.row('logIndex')
-          ])
-          .run(conn)
-      }
-      catch (e)
-      {
-        console.log('[ETH] index already exists')
-      }
-      console.log(`[ETH] Getting last block from RethinkDB`)
-      fromBlock = await getLastBlock(db, conn, options.rethinkTable)
-      console.log(`[ETH] Last block: ${fromBlock}`)
-      return [db, conn]
-    }
-    catch (err)
-    {
-      console.error('[ETH] Failed to connect to RethinkDB.')
-      console.error(err)
-    }
-    return [undefined as any, undefined as any]
-  }
-  let fromBlock = 0
   let [db, conn] = await connectToRethink(options)
+  const fromBlock = await getLastBlock(db, conn, opts.rethinkTable)
+  console.log(`[ETH] Last block: ${fromBlock}`)
 
   console.log('[ETH] Starting watcher.')
   masterContract.events
