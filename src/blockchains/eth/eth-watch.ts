@@ -175,7 +175,7 @@ export const start: IBlockchainReader = async listener => {
         id: event.transactionHash,
         task: event.returnValues.name,
         contract: event.returnValues.receiver,
-        args: event.returnValues.params,
+        args: event.returnValues.params || [],
         memo: event.returnValues.memo,
         timestamp: new Date().getTime()
       }
