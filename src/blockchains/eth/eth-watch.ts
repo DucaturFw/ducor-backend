@@ -130,7 +130,6 @@ async function connectToRethink(opts: IEthereumWatcherOptions): Promise<[r.Db, r
             .indexWait('chronological')
             .run(conn)
     }
-    console.log(`[ETH] Getting last block from RethinkDB`)
     return [db, conn]
   }
   catch (err)
@@ -158,7 +157,14 @@ export const start: IBlockchainReader = async listener => {
   )
 
   let [db, conn] = await connectToRethink(options)
-  const fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+  console.log(`[ETH] Getting last block from RethinkDB`)
+  let fromBlock;
+  try {
+    fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+  } catch (err) {
+    console.log('[ETH] Error while handling last block:', err)
+  }
+  fromBlock = fromBlock || parseInt(process.env.DUCOR_ETH_FROM_BLOCK!) || 0;
   console.log(`[ETH] Last block: ${fromBlock}`)
 
   console.log('[ETH] Starting watcher.')
