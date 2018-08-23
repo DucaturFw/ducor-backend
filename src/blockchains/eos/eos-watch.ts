@@ -1,11 +1,7 @@
-import {
-  IBlockchainReader,
-  IBlockchainPusher,
-  RequestHandler
-} from "../../IBlockchain"
+import { IBlockchainReader, RequestHandler } from "../../IBlockchain"
 import Eos, { EosInstance, IEosContract } from "eosjs"
 import r from "rethinkdb"
-import { log, info, error, warn } from "./utils/logger"
+import { log, info, error, warn, verbose } from "./utils/logger"
 
 export enum TaskMode {
   Disabled,
@@ -144,9 +140,9 @@ export const checkOrCreateTable = (ctx: Partial<IContext>) => async (
 }
 
 export const readyTaskFilter = (ctx: IContext) => (t: ITask): boolean => {
-  log("validate task", t)
+  verbose("validate task", t)
   if (t.mode === 0) {
-    log("inactive task")
+    verbose("inactive task")
     return false
   }
 

@@ -7,11 +7,9 @@ function getLogChannels(conf?: string): string[] {
     return []
   }
 
-  if (conf === "*") {
-    return ["ERR", "WARNING", "INFO", "LOG"]
-  }
+  conf = conf.replace('*', 'ERR,WARNING,INFO,LOG')
 
-  return conf.split(",")
+  return conf.split(",").map(s => s.trim())
 }
 
 const getOptions = (): ILoggerOptions => ({
@@ -23,6 +21,10 @@ function genericLog(channel: string, message?: any, ...optionalParams: any[]) {
   if (channels.includes(channel)) {
     console.log(`[EOS-WATCH][${channel}]: `, message, ...optionalParams)
   }
+}
+
+export function verbose(message?: any, ...optionalParams: any[]) {
+  genericLog("VERBOSE", message, ...optionalParams)
 }
 
 export function log(message?: any, ...optionalParams: any[]) {
