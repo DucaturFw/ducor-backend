@@ -24,6 +24,10 @@ export function assertEnv() {
     "DUCOR_EOS_RETHINKHOST not found in .env!"
   )
   console.assert(
+    process.env.DUCOR_ETH_MASTER_ADDRESS,
+    "DUCOR_ETH_MASTER_ADDRESS not found in .env!"
+  )
+  console.assert(
     process.env.DUCOR_EOS_RETHINKPORT,
     "DUCOR_EOS_RETHINKPORT not found in .env!"
   )
@@ -123,20 +127,32 @@ export const start: IBlockchainReader = async listener => {
     options.masterAddress
   )
 
-  let fromBlock = 0
-  let db: r.Db | undefined
-  let conn: r.Connection | undefined
-  try {
-    console.log('[ETH] Getting or creating RethinkDB table.')
-    const conn = await getConnection(options.rethinkHost, options.rethinkPort)
-    const db = await getOrCreateDatabase(options.rethinkDB, conn)
-    await checkOrCreateTable(options.rethinkTable, db, conn, {
+  async function connectToRethink(opts: typeof options): Promise<[r.Db, r.Connection]>
+  {
+    try
+    {
+      console.log(`[ETH] Connectin to RethinkDB on ${options.rethinkHost}:${options.rethinkPort}`)
+      const conn = await getConnection(options.rethinkHost, options.rethinkPort)
+      console.log(`[ETH] Getting or creating RethinkDB database '${options.rethinkDB}'`)
+      const db = await getOrCreateDatabase(options.rethinkDB, conn)
+      console.log(`[ETH] Getting or creating RethinkDB table '${options.rethinkTable}'`)
+      await checkOrCreateTable(options.rethinkTable, db, conn, {
         primary_key: "id"
-    })
-    fromBlock = await getLastBlock(db, conn, options.rethinkTable)
-  } catch (err) {
-        console.error('[ETH] Failed to connect to RethinkDB.');
+      })
+      console.log(`[ETH] Getting last block from RethinkDB`)
+      fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+      console.log(`[ETH] Last block: ${fromBlock}`)
+      return [db, conn]
+    }
+    catch (err)
+    {
+      console.error('[ETH] Failed to connect to RethinkDB.')
+      console.error(err)
+    }
+    return [undefined as any, undefined as any]
   }
+  let fromBlock = 0
+  let [db, conn] = await connectToRethink(options)
 
   console.log('[ETH] Starting watcher.')
   masterContract.events
