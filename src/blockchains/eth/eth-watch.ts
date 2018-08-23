@@ -33,7 +33,7 @@ export function assertEnv() {
   )
   console.assert(
     process.env.DUCOR_ETH_RETHINKTABLE,
-    "DUCOR_EOS_RETHINKTABLE not found in .env!"
+    "DUCOR_ETH_RETHINKTABLE not found in .env!"
   )
 }
 
@@ -99,6 +99,13 @@ export function parseArgs(args: number[], signature: IDataProviderRequestArg[]) 
   }) || []
 }
 
+export const getLastBlock = (db: r.Db, conn: r.Connection, table: string): Promise<number> =>
+  db.table(table)
+    .orderBy({ index: 'chronological' })
+    .nth(-1)('blockNumber')
+    .default(0)
+    .run(conn)
+
 export const start: IBlockchainReader = async listener => {
   const options = getOptions()
   const web3 = new Web3()
@@ -106,31 +113,35 @@ export const start: IBlockchainReader = async listener => {
   const eventProvider = new Web3.providers.WebsocketProvider(
     options.web3provider
   )
+
   web3.setProvider(eventProvider)
   await web3.eth.net.isListening()
+  console.log('[ETH] Listening to web3 provider.')
 
   const masterContract = new web3.eth.Contract(
     master.abi,
     options.masterAddress
   )
 
-  masterContract.events
-    .allEvents({
-      fromBlock: 2858489
+  let fromBlock = 0
+  let db: r.Db | undefined
+  let conn: r.Connection | undefined
+  try {
+    console.log('[ETH] Getting or creating RethinkDB table.')
+    const conn = await getConnection(options.rethinkHost, options.rethinkPort)
+    const db = await getOrCreateDatabase(options.rethinkDB, conn)
+    await checkOrCreateTable(options.rethinkTable, db, conn, {
+        primary_key: "id"
     })
-    .on("data", async event => {
-      let conn: r.Connection | undefined = undefined
-      let db: r.Db | undefined = undefined
-      try {
-        conn = await getConnection(options.rethinkHost, options.rethinkPort)
-        db = await getOrCreateDatabase(options.rethinkDB, conn)
-        await checkOrCreateTable(options.rethinkTable, db, conn, {
-          primary_key: "id"
-        })
-      } catch (err) {
-        console.error(err);
-      }
+    fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+  } catch (err) {
+        console.error('[ETH] Failed to connect to RethinkDB.');
+  }
 
+  console.log('[ETH] Starting watcher.')
+  masterContract.events
+    .allEvents({ fromBlock })
+    .on("data", async event => {
       const model = {
         id: event.transactionHash,
         task: event.returnValues.name,
@@ -141,6 +152,7 @@ export const start: IBlockchainReader = async listener => {
       }
 
       if (db && conn) {
+        console.log('[ETH] Inserting to RethinkDB.')
         await db
             .table(options.rethinkTable)
             .insert([model], {
@@ -150,9 +162,10 @@ export const start: IBlockchainReader = async listener => {
 
         await conn!.close()
       } else {
-        console.debug('RethinkDB is not connected!')
+        console.log('[ETH] RethinkDB is not connected.')
       }
 
+      console.log('[ETH] Pushing to listener.')
       listener({
         dataHash: model.task,
         requestId: model.id,
@@ -162,11 +175,12 @@ export const start: IBlockchainReader = async listener => {
         memo: model.memo,
         timestamp: model.timestamp,
       }, parseArgs)
+        .catch(err => console.error('Error while sending to listener:', err))
     })
 
   return {
     stop: async () => {
-      console.log("stop ethereum watcher")
+      console.log("[ETH] Stop watcher.")
     }
   }
 }
