@@ -158,10 +158,11 @@ export const start: IBlockchainReader = async listener => {
 
   let [db, conn] = await connectToRethink(options)
   console.log(`[ETH] Getting last block from RethinkDB`)
+  let fromBlock = 0;
   try {
-    const fromBlock = await getLastBlock(db, conn, options.rethinkTable)
+    fromBlock = await getLastBlock(db, conn, options.rethinkTable)
   } catch (err) {
-    const fromBlock = process.env.DUCOR_ETH_FROM_BLOCK! || 0;
+    fromBlock = parseInt(process.env.DUCOR_ETH_FROM_BLOCK!) || 0;
   }
   console.log(`[ETH] Last block: ${fromBlock}`)
 
