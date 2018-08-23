@@ -99,7 +99,7 @@ export function parseArgs(args: number[], signature: IDataProviderRequestArg[]) 
   }) || []
 }
 
-const getLastBlock = (db: r.Db, conn: r.Connection, table: string): Promise<number> =>
+export const getLastBlock = (db: r.Db, conn: r.Connection, table: string): Promise<number> =>
   db.table(table)
     .orderBy({ index: 'chronological' })
     .nth(-1)('blockNumber')
