@@ -105,7 +105,7 @@ export const getLastBlock = (db: r.Db, conn: r.Connection, table: string): Promi
     .default(0)
     .run(conn)
 
-async function connectToRethink(opts: typeof options): Promise<[r.Db, r.Connection]>
+async function connectToRethink(opts: IEthereumWatcherOptions): Promise<[r.Db, r.Connection]>
 {
   try
   {
@@ -118,7 +118,7 @@ async function connectToRethink(opts: typeof options): Promise<[r.Db, r.Connecti
       primary_key: "id"
     })
     console.log(`[ETH] Creating 'chronological' index on table '${opts.rethinkTable}'`)
-    const indexes = await db.indexList().run(conn)
+    const indexes = await db.table(opts.rethinkTable).indexList().run(conn)
     if (indexes.indexOf('chronological') === -1)
     await db.table(opts.rethinkTable).indexCreate('chronological', [r.row('blockNumber'), r.row('logIndex')]).run(conn)
     await db.table(opts.rethinkTable).indexWait('chronological').run(conn)
@@ -150,7 +150,7 @@ export const start: IBlockchainReader = async listener => {
   )
 
   let [db, conn] = await connectToRethink(options)
-  const fromBlock = await getLastBlock(db, conn, opts.rethinkTable)
+  const fromBlock = await getLastBlock(db, conn, options.rethinkTable)
   console.log(`[ETH] Last block: ${fromBlock}`)
 
   console.log('[ETH] Starting watcher.')
