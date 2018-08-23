@@ -288,7 +288,7 @@ export const start: IBlockchainReader = async listener => {
         }`
       )
       context.tasks = await getTasks(context)(context.options.masterAccount)
-      log(`Received tasks \n`, context.tasks)
+      verbose(`Received tasks \n`, context.tasks)
     } catch (e) {
       error("Unexpected error in requesting tasks")
       error(e)
