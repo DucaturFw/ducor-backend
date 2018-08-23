@@ -73,16 +73,11 @@ export async function getOrCreateDatabase(
   return r.db(database)
 }
 
-export async function checkOrCreateTable(
-  table: string,
-  db: r.Db,
-  conn: r.Connection,
-  opts?: r.TableOptions
-) {
+export async function checkOrCreateTable(table: string, db: r.Db, conn: r.Connection, opts?: r.TableOptions)
+{
   const tables = await db.tableList().run(conn)
-  if (tables.indexOf(table) === -1) {
+  if (tables.indexOf(table) === -1)
     await db.tableCreate(table, opts).run(conn)
-  }
 }
 
 export function parseArgs(args: number[], signature: IDataProviderRequestArg[]) {
@@ -139,6 +134,21 @@ export const start: IBlockchainReader = async listener => {
       await checkOrCreateTable(options.rethinkTable, db, conn, {
         primary_key: "id"
       })
+      console.log(`[ETH] Creating 'chronological' index on table '${options.rethinkTable}'`)
+      try
+      {
+        await db
+          .table(options.rethinkTable)
+          .indexCreate('chronological', [
+            r.row('blockNumber'),
+            r.row('logIndex')
+          ])
+          .run(conn)
+      }
+      catch (e)
+      {
+        console.log('[ETH] index already exists')
+      }
       console.log(`[ETH] Getting last block from RethinkDB`)
       fromBlock = await getLastBlock(db, conn, options.rethinkTable)
       console.log(`[ETH] Last block: ${fromBlock}`)
